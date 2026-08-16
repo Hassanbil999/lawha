@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-palette="waraq" data-density="comfortable" data-labels="on">
+<head>
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <title>لوحة</title>
+  <link rel="stylesheet" href="../shared/fonts.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tuning.css">
+  <link rel="stylesheet" href="sidebar.css">
+</head>
+<body class="panel">
+  <header class="panel-head">
+    <span class="panel-mark" id="mark" aria-hidden="true"></span>
+    <!-- The count, written from JS: "12 tabs". A panel about your tabs should
+         say how many there are before it says anything else. -->
+    <h1 class="panel-title" id="tab-count"></h1>
+  </header>
+
+  <div class="panel-filter">
+    <input class="l-input tabs-filter" type="search" id="filter"
+           autocomplete="off" spellcheck="false"
+           data-i18n-placeholder="tabs_filter" data-i18n-aria="tabs_filter">
+  </div>
+
+  <main class="panel-body">
+    <ul class="tabs" id="tabs" role="list"></ul>
+    <p class="l-empty tabs-empty" id="tabs-empty" hidden></p>
+
+    <!-- Adjusting the canvas lives below the tabs rather than beside them. At
+         320px there is only ever one column, so the question is which comes
+         first, and the tabs are what the panel is opened for. -->
+    <section class="panel-tune">
+      <h2 class="l-label panel-tune-label" data-i18n="tune_title"></h2>
+      <div class="tune" id="tune"></div>
+    </section>
+  </main>
+
+  <p class="panel-toast" id="toast" role="status" aria-live="polite" hidden></p>
+
+  <script type="module" src="sidebar.js"></script>
+</body>
+</html>

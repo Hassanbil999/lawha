@@ -1,0 +1,132 @@
+{
+  "lawha": true,
+  "schemaVersion": 2,
+  "kind": "scene",
+  "meta": {
+    "id": "rasf",
+    "name": "Rasf",
+    "nameAr": "رصف",
+    "author": "",
+    "remixOf": null,
+    "created": "2026-08-16T10:30:00Z",
+    "note": "Everything at once, in tiles. Nothing is more than one glance away.",
+    "tags": [
+      "dense",
+      "light",
+      "creative"
+    ]
+  },
+  "palette": "sadaf",
+  "grid": {
+    "maxWidth": 1240,
+    "gap": 3,
+    "columns": "1fr 1fr 1fr",
+    "areas": [
+      "time quick notes",
+      "recent recent notes",
+      "books books later"
+    ],
+    "breakpoints": {
+      "980": {
+        "columns": "1fr 1fr",
+        "areas": [
+          "time quick",
+          "recent recent",
+          "books books",
+          "notes later"
+        ]
+      },
+      "620": {
+        "columns": "1fr",
+        "areas": [
+          "time",
+          "quick",
+          "recent",
+          "books",
+          "notes",
+          "later"
+        ]
+      }
+    }
+  },
+  "regions": {
+    "time": {
+      "modules": [
+        "clock",
+        "waqt"
+      ],
+      "align": "start"
+    },
+    "quick": {
+      "modules": [
+        "shortcuts"
+      ],
+      "align": "start"
+    },
+    "notes": {
+      "modules": [
+        "notes"
+      ],
+      "align": "stretch"
+    },
+    "recent": {
+      "modules": [
+        "recent"
+      ],
+      "align": "stretch"
+    },
+    "books": {
+      "modules": [
+        "bookmarks"
+      ],
+      "align": "stretch"
+    },
+    "later": {
+      "modules": [
+        "later"
+      ],
+      "align": "start"
+    }
+  },
+  "modules": {
+    "clock": {
+      "variant": "minimal",
+      "seconds": false,
+      "greeting": true,
+      "date": false
+    },
+    "waqt": {
+      "variant": "bar"
+    },
+    "shortcuts": {
+      "variant": "squares",
+      "max": 8,
+      "perRow": 4,
+      "labels": true
+    },
+    "recent": {
+      "variant": "tiles",
+      "max": 8,
+      "showDomain": true,
+      "showTime": false
+    },
+    "bookmarks": {
+      "variant": "tiles",
+      "max": 4,
+      "expandable": false
+    },
+    "notes": {
+      "variant": "cards",
+      "max": 4
+    },
+    "later": {
+      "variant": "list",
+      "max": 5
+    },
+    "search": {
+      "variant": "off"
+    }
+  },
+  "density": "compact",
+  "sectionLabels": false
+}

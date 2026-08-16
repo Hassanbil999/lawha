@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-palette="waraq" data-density="comfortable" data-labels="on" data-bg="theme">
+<head>
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <title>لوحة</title>
+  <link rel="stylesheet" href="../shared/fonts.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="newtab.css">
+</head>
+<body>
+  <div class="l-bg" aria-hidden="true"></div>
+
+  <!-- Where the restore-your-tabs strip appears, on the rare morning after a
+       crash. Empty and zero-height every other day. -->
+  <div id="banner"></div>
+
+  <!-- The scroll lives here rather than on <body>, so the page itself never
+       scrolls (nothing below the fold to reach) while a dense Scene's content
+       stays reachable. -->
+  <div class="scene-scroll">
+    <main class="scene" id="scene"></main>
+  </div>
+
+  <!-- The one mark focus mode leaves. Hidden until it is on. -->
+  <p class="focus-flag" data-i18n="focus_indicator" aria-hidden="true"></p>
+
+  <p class="l-sr-only" role="status" aria-live="polite" id="announcer"></p>
+
+  <script type="module" src="newtab.js"></script>
+</body>
+</html>

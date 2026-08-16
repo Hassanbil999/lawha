@@ -1,0 +1,100 @@
+{
+  "lawha": true,
+  "schemaVersion": 2,
+  "kind": "scene",
+  "meta": {
+    "id": "satr",
+    "name": "Satr",
+    "nameAr": "سطر",
+    "author": "",
+    "remixOf": null,
+    "created": "2026-08-16T10:30:00Z",
+    "note": "One narrow column. Everything is a line of text, and there is very little of it.",
+    "tags": [
+      "minimal",
+      "light",
+      "focus",
+      "arabic-friendly"
+    ]
+  },
+  "palette": "nakhla",
+  "grid": {
+    "maxWidth": 520,
+    "gap": 6,
+    "columns": "1fr",
+    "areas": [
+      "hero",
+      "quick",
+      "recent",
+      "collections"
+    ],
+    "breakpoints": {}
+  },
+  "regions": {
+    "hero": {
+      "modules": [
+        "clock"
+      ],
+      "align": "center"
+    },
+    "quick": {
+      "modules": [
+        "shortcuts"
+      ],
+      "align": "center"
+    },
+    "recent": {
+      "modules": [
+        "recent"
+      ],
+      "align": "stretch"
+    },
+    "collections": {
+      "modules": [
+        "bookmarks",
+        "later"
+      ],
+      "align": "stretch"
+    }
+  },
+  "modules": {
+    "clock": {
+      "variant": "minimal",
+      "seconds": false,
+      "greeting": false,
+      "date": false
+    },
+    "waqt": {
+      "variant": "off"
+    },
+    "shortcuts": {
+      "variant": "circles",
+      "max": 6,
+      "perRow": 6,
+      "labels": false
+    },
+    "recent": {
+      "variant": "compact",
+      "max": 6,
+      "showDomain": false,
+      "showTime": false
+    },
+    "bookmarks": {
+      "variant": "tree",
+      "max": 4,
+      "expandable": true
+    },
+    "notes": {
+      "variant": "off",
+      "max": 6
+    },
+    "later": {
+      "variant": "count"
+    },
+    "search": {
+      "variant": "off"
+    }
+  },
+  "density": "airy",
+  "sectionLabels": true
+}

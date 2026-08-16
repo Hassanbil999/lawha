@@ -1,0 +1,390 @@
+/* Lawha — the Scene gallery.
+ *
+ * A calm browsable page, not a settings screen. Cards are mostly preview:
+ * the thing you are choosing between is what it looks like, so that is what
+ * takes the space. */
+
+.gal {
+  min-block-size: 100vh;
+  background-color: var(--bg-canvas);
+}
+
+/* ---- Header ------------------------------------------------------------- */
+
+.gal-head {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 10;
+  background-color: var(--bg-canvas);
+  border-block-end: var(--hairline) solid var(--border);
+}
+
+.gal-head-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  max-inline-size: 1200px;
+  margin-inline: auto;
+  padding: var(--space-5) var(--space-6) var(--space-4);
+}
+
+.gal-mark {
+  display: flex;
+  color: var(--accent);
+}
+
+.gal-title {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 500;
+  color: var(--text-primary);
+  text-align: start;
+}
+
+.gal-title-ar {
+  margin-inline-start: var(--space-3);
+  color: var(--text-muted);
+}
+
+.gal-head-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.gal-file {
+  cursor: pointer;
+}
+
+.gal-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  max-inline-size: 1200px;
+  margin-inline: auto;
+  padding: 0 var(--space-6) var(--space-4);
+}
+
+.gal-pill {
+  padding: var(--space-1) var(--space-4);
+  border-radius: var(--radius-pill);
+  border: var(--hairline) solid var(--border);
+  background-color: var(--bg-card);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  transition: background-color var(--dur-quick) var(--ease-out),
+              border-color var(--dur-quick) var(--ease-out),
+              color var(--dur-quick) var(--ease-out);
+}
+
+.gal-pill:hover {
+  border-color: var(--text-muted);
+}
+
+.gal-pill[aria-pressed="true"] {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+/* ---- Body --------------------------------------------------------------- */
+
+.gal-body {
+  max-inline-size: 1200px;
+  margin-inline: auto;
+  padding: var(--space-6);
+}
+
+.gal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-5);
+}
+
+.gal-empty {
+  padding-block: var(--space-7);
+  text-align: center;
+}
+
+/* ---- Cards -------------------------------------------------------------- */
+
+.gal-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  border: var(--hairline) solid var(--border);
+  background-color: var(--bg-card);
+  overflow: hidden;
+  transition: transform var(--dur-quick) var(--ease-out),
+              box-shadow var(--dur-quick) var(--ease-out),
+              border-color var(--dur-quick) var(--ease-out);
+}
+
+.gal-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.gal-card[data-active="true"] {
+  border-color: var(--accent);
+}
+
+/* The preview is the real new tab page at full size, scaled down. 1120×700 at
+   0.25 lands at 280×175 — the card is a window onto the thing itself. */
+.gal-card-preview {
+  position: relative;
+  block-size: 175px;
+  overflow: hidden;
+  background-color: var(--bg-raised);
+  border-block-end: var(--hairline) solid var(--border);
+}
+
+.gal-card-frame {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: 1120px;
+  block-size: 700px;
+  border: 0;
+  transform: scale(0.25);
+  /* `0 0` rather than a physical keyword; the frame is a fixed-size box, so
+     this is correct in both directions. */
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+
+.gal-card-body {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-4);
+}
+
+.gal-card-name {
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: var(--text-primary);
+  text-align: start;
+}
+
+.gal-card-sub {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  text-align: start;
+}
+
+.gal-card-origin {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-align: start;
+}
+
+.gal-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-block-start: var(--space-2);
+}
+
+.gal-tag {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-raised);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.gal-card-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-block-start: var(--space-3);
+}
+
+.gal-apply {
+  flex: 1 1 auto;
+  justify-content: center;
+}
+
+.gal-apply[disabled] {
+  cursor: default;
+  color: var(--text-muted);
+}
+
+/* ---- Import ------------------------------------------------------------- */
+
+.gal-import {
+  max-inline-size: 560px;
+  margin-block-start: var(--space-8);
+  display: grid;
+  gap: var(--space-2);
+}
+
+.gal-import-field {
+  resize: vertical;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.gal-import-note {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-align: start;
+  min-block-size: 16px;
+}
+
+/* ---- Builder ------------------------------------------------------------ */
+
+.gal-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-block-end: var(--space-5);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.gal-back::before {
+  content: "";
+  inline-size: 8px;
+  block-size: 8px;
+  border-block-start: var(--hairline) solid currentColor;
+  border-inline-start: var(--hairline) solid currentColor;
+  rotate: -45deg;
+  scale: var(--dir) 1;
+}
+
+.gal-back:hover {
+  color: var(--accent);
+}
+
+.gal-builder {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.gal-builder-preview {
+  position: sticky;
+  inset-block-start: 140px;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.gal-preview-frame-wrap {
+  position: relative;
+  container-type: inline-size;
+  inline-size: 100%;
+  aspect-ratio: 1120 / 700;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: var(--hairline) solid var(--border);
+  background-color: var(--bg-raised);
+}
+
+/* Scaled by container width rather than a fixed factor, so the preview stays
+   a faithful 1120px page at whatever size the column happens to be. */
+.gal-preview-frame {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: 1120px;
+  block-size: 700px;
+  border: 0;
+  transform: scale(calc(100cqw / 1120));
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+
+.gal-remix,
+.gal-contrast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-align: start;
+}
+
+.gal-contrast[data-state="warn"],
+.gal-contrast[data-state="fail"] {
+  color: var(--text-primary);
+}
+
+.gal-builder-controls {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.gal-builder-controls > .l-label {
+  margin-block: var(--space-4) 0;
+}
+
+.gal-rows {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.gal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-block-size: 28px;
+}
+
+.gal-row-label {
+  flex: 0 0 42%;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  text-align: start;
+}
+
+.gal-row .l-select {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.gal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-block-start: var(--space-4);
+}
+
+.gal-actions .l-btn {
+  flex: 1 1 auto;
+  justify-content: center;
+}
+
+.gal-toast {
+  position: fixed;
+  inset-block-end: var(--space-5);
+  inset-inline-start: 50%;
+  /* Centring by hand: the shift has to run against the inline direction, which
+     reverses under RTL. */
+  transform: translateX(calc(-50% * var(--dir)));
+  max-inline-size: 420px;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-pill);
+  border: var(--hairline) solid var(--border);
+  background-color: var(--bg-card);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  text-align: center;
+  z-index: 50;
+}
+
+@media (max-width: 860px) {
+  .gal-builder {
+    grid-template-columns: 1fr;
+  }
+
+  .gal-builder-preview {
+    position: static;
+  }
+}

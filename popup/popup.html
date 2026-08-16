@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-palette="waraq" data-density="comfortable" data-labels="on">
+<head>
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <title>لوحة</title>
+  <link rel="stylesheet" href="../shared/fonts.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tuning.css">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body class="pop">
+  <header class="pop-head">
+    <span class="pop-mark" id="mark" aria-hidden="true"></span>
+    <h1 class="pop-title">لوحة</h1>
+    <button class="l-btn pop-panel-btn" type="button" id="open-sidebar"
+            data-i18n="action_open_sidebar"></button>
+  </header>
+
+  <main class="pop-scroll tune" id="tune"></main>
+
+  <p class="pop-toast" id="toast" role="status" aria-live="polite" hidden></p>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

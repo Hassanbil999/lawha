@@ -1,0 +1,124 @@
+{
+  "lawha": true,
+  "schemaVersion": 2,
+  "kind": "scene",
+  "meta": {
+    "id": "diwan",
+    "name": "Diwan",
+    "nameAr": "ديوان",
+    "author": "",
+    "remixOf": null,
+    "created": "2026-08-16T10:30:00Z",
+    "note": "A reading desk. Wide margins, one column of attention.",
+    "tags": [
+      "minimal",
+      "light",
+      "arabic-friendly"
+    ]
+  },
+  "palette": "waraq",
+  "grid": {
+    "maxWidth": 1120,
+    "gap": 5,
+    "columns": "1fr 1fr",
+    "areas": [
+      "header header",
+      "hero hero",
+      "quick quick",
+      "left right",
+      "foot foot"
+    ],
+    "breakpoints": {
+      "720": {
+        "columns": "1fr",
+        "areas": [
+          "header",
+          "hero",
+          "quick",
+          "left",
+          "right",
+          "foot"
+        ]
+      }
+    }
+  },
+  "regions": {
+    "header": {
+      "modules": [
+        "waqt"
+      ],
+      "align": "stretch"
+    },
+    "hero": {
+      "modules": [
+        "clock"
+      ],
+      "align": "center"
+    },
+    "quick": {
+      "modules": [
+        "shortcuts"
+      ],
+      "align": "center"
+    },
+    "left": {
+      "modules": [
+        "recent"
+      ],
+      "align": "start"
+    },
+    "right": {
+      "modules": [
+        "bookmarks"
+      ],
+      "align": "start"
+    },
+    "foot": {
+      "modules": [
+        "notes",
+        "later"
+      ],
+      "align": "stretch"
+    }
+  },
+  "modules": {
+    "clock": {
+      "variant": "monumental",
+      "seconds": false,
+      "greeting": true,
+      "date": true
+    },
+    "waqt": {
+      "variant": "arc"
+    },
+    "shortcuts": {
+      "variant": "circles",
+      "max": 16,
+      "perRow": 8,
+      "labels": true
+    },
+    "recent": {
+      "variant": "list",
+      "max": 8,
+      "showDomain": true,
+      "showTime": true
+    },
+    "bookmarks": {
+      "variant": "folders",
+      "max": 6,
+      "expandable": true
+    },
+    "notes": {
+      "variant": "cards",
+      "max": 6
+    },
+    "later": {
+      "variant": "count"
+    },
+    "search": {
+      "variant": "off"
+    }
+  },
+  "density": "comfortable",
+  "sectionLabels": true
+}

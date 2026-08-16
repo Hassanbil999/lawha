@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none"
+     stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+     stroke-linejoin="round" role="img" aria-label="Lawha">
+  <!-- The letter lam (ل): a tall upright, then the bowl sweeping down and
+       back to the left. Same hairline weight as the Waqt arc, so the mark and
+       the signature element read as one hand. -->
+  <path d="M21 7 L21 19 Q21 25 15 25 Q9 25 9 19" />
+  <!-- The present moment, borrowed from the arc. It sits at the head of the
+       upright, where the letter starts. -->
+  <circle cx="21" cy="7" r="2" fill="currentColor" stroke="none" />
+</svg>

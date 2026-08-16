@@ -1,0 +1,94 @@
+/* Lawha — self test page. Dev-only; nothing here is part of the product. */
+
+.st {
+  max-inline-size: 900px;
+  margin-inline: auto;
+  padding: var(--space-7) var(--space-5);
+}
+
+.st-head {
+  display: grid;
+  gap: var(--space-3);
+  margin-block-end: var(--space-6);
+}
+
+.st-title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 500;
+}
+
+.st-sub {
+  max-inline-size: 62ch;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+
+.st-head .l-btn {
+  justify-self: start;
+}
+
+.st-results {
+  display: grid;
+  gap: var(--space-2);
+  counter-reset: step;
+}
+
+.st-step {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: var(--space-3);
+  align-items: baseline;
+  padding: var(--space-3);
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-card);
+  font-size: var(--text-sm);
+}
+
+.st-mark {
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  line-height: 1;
+}
+
+.st-step[data-state="pass"] .st-mark { color: var(--accent); }
+.st-step[data-state="fail"] .st-mark { color: var(--text-primary); }
+.st-step[data-state="fail"] { background-color: var(--accent-soft); }
+
+.st-detail {
+  display: block;
+  margin-block-start: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.st-verdict {
+  margin-block-start: var(--space-5);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-md);
+  background-color: var(--bg-raised);
+}
+
+/* The render target has to be laid out for real — a display:none iframe never
+   paints, and an assertion against an unpainted tree proves nothing. Parked
+   off-screen at full size instead. */
+.st-stage {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: 1120px;
+  block-size: 720px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.st-frame {
+  inline-size: 1120px;
+  block-size: 720px;
+  border: 0;
+}

@@ -1,0 +1,131 @@
+/* Lawha — the side panel shell.
+ *
+ * The controls themselves live in shared/tuning.css, shared with the popup.
+ * This file is only the frame: a header, a scrolling body, and a toast. */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  block-size: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-canvas);
+}
+
+.panel-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-block-end: var(--hairline) solid var(--border);
+}
+
+.panel-mark {
+  display: flex;
+  color: var(--accent);
+}
+
+.panel-title {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.panel-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  align-content: start;
+}
+
+.panel-toast {
+  flex: none;
+  padding: var(--space-3) var(--space-4);
+  border-block-start: var(--hairline) solid var(--border);
+  background-color: var(--bg-raised);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  text-align: start;
+}
+
+/* ---- The tab list -------------------------------------------------------
+   List mode. A row is a button, not a link — a link in a side panel navigates
+   the panel itself. */
+
+.panel-filter {
+  flex: none;
+  padding: var(--space-3) var(--space-4);
+  border-block-end: var(--hairline) solid var(--border);
+}
+
+.tabs-filter {
+  font-size: var(--text-sm);
+}
+
+.tabs {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-2);
+}
+
+.tab {
+  text-align: start;
+}
+
+.tab[data-active="true"] {
+  background-color: var(--bg-raised);
+}
+
+/* Weight 600 lives here and on the clock, nowhere else. The tab you are
+   looking at is the one fact this list exists to make obvious. */
+.tab[data-active="true"] .tab-title {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.tab-mark {
+  flex: none;
+  display: inline-flex;
+  color: var(--text-muted);
+}
+
+/* Untouched for more than a day. A dot, not a badge — it is a note to
+   yourself, not a warning. */
+.tab-stale {
+  flex: none;
+  inline-size: 4px;
+  block-size: 4px;
+  border-radius: var(--radius-pill);
+  background-color: var(--text-muted);
+}
+
+.tabs-empty {
+  padding-inline: var(--space-4);
+}
+
+/* ---- Adjusting, beneath the tabs ---------------------------------------- */
+
+.panel-tune {
+  border-block-start: var(--hairline) solid var(--border);
+  margin-block-start: var(--space-3);
+}
+
+.panel-tune-label {
+  padding: var(--space-4) var(--space-4) 0;
+}
+
+/* Below roughly 300px the ten gradient presets stop being distinguishable
+   swatches and start being a texture. Two rows of five reads better. */
+@media (max-width: 320px) {
+  .tune-presets {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .tune-segment {
+    flex-wrap: wrap;
+  }
+
+  .tune-seg {
+    flex: 1 1 40%;
+  }
+}

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-palette="waraq" data-density="comfortable" data-labels="on">
+<head>
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <title>Lawha Scenes · مشاهد لوحة</title>
+  <link rel="stylesheet" href="../shared/fonts.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="gallery.css">
+</head>
+<body class="gal">
+  <header class="gal-head">
+    <div class="gal-head-inner">
+      <span class="gal-mark" id="mark" aria-hidden="true"></span>
+      <h1 class="gal-title">Lawha Scenes <span class="gal-title-ar">مشاهد لوحة</span></h1>
+
+      <div class="gal-head-actions">
+        <label class="l-btn gal-file">
+          <span data-i18n="set_import"></span>
+          <input type="file" accept=".json,application/json" id="import-file" class="l-sr-only">
+        </label>
+        <button class="l-btn l-btn-primary" type="button" id="create"
+                data-i18n="gal_create"></button>
+      </div>
+    </div>
+
+    <nav class="gal-filters" id="filters" aria-label="Filter"></nav>
+  </header>
+
+  <!-- Browsing -->
+  <main class="gal-body" id="grid-view">
+    <div class="gal-grid" id="grid"></div>
+    <p class="l-empty gal-empty" id="grid-empty" data-i18n="gal_empty" hidden></p>
+
+    <section class="gal-import">
+      <h2 class="l-label" data-i18n="set_import"></h2>
+      <textarea class="l-input gal-import-field" id="import-text" rows="3"
+                data-i18n-placeholder="gal_import_url"></textarea>
+      <p class="gal-import-note" id="import-note"></p>
+    </section>
+  </main>
+
+  <!-- Building -->
+  <main class="gal-body" id="builder-view" hidden>
+    <button class="gal-back" type="button" id="back">
+      <span data-i18n="gal_back"></span>
+    </button>
+
+    <div class="gal-builder">
+      <div class="gal-builder-preview">
+        <div class="gal-preview-frame-wrap">
+          <iframe class="gal-preview-frame" id="preview" title="preview"
+                  src="../newtab/newtab.html?preview=1"></iframe>
+        </div>
+        <p class="gal-remix" id="remix-note" hidden></p>
+        <p class="gal-contrast" id="contrast"></p>
+      </div>
+
+      <div class="gal-builder-controls">
+        <div class="gal-rows">
+          <label class="gal-row">
+            <span class="gal-row-label" data-i18n="set_start_from"></span>
+            <select class="l-select" id="b-base"></select>
+          </label>
+          <label class="gal-row">
+            <span class="gal-row-label" data-i18n="set_arrangement"></span>
+            <select class="l-select" id="b-arrangement"></select>
+          </label>
+          <label class="gal-row">
+            <span class="gal-row-label" data-i18n="set_palette"></span>
+            <select class="l-select" id="b-palette"></select>
+          </label>
+          <label class="gal-row">
+            <span class="gal-row-label" data-i18n="set_density"></span>
+            <select class="l-select" id="b-density"></select>
+          </label>
+          <label class="gal-row">
+            <span class="gal-row-label" data-i18n="set_labels"></span>
+            <select class="l-select" id="b-labels"></select>
+          </label>
+        </div>
+
+        <h2 class="l-label" data-i18n="module_label"></h2>
+        <div class="gal-rows" id="b-modules"></div>
+
+        <h2 class="l-label" data-i18n="build_name"></h2>
+        <input class="l-input" type="text" id="b-name" maxlength="40">
+
+        <div class="gal-actions">
+          <button class="l-btn l-btn-primary" type="button" id="b-save"
+                  data-i18n="action_save_scene"></button>
+          <button class="l-btn" type="button" id="b-export" data-i18n="set_export"></button>
+          <button class="l-btn" type="button" id="b-share" data-i18n="gal_share"></button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <p class="gal-toast" id="toast" role="status" aria-live="polite" hidden></p>
+
+  <script type="module" src="gallery.js"></script>
+</body>
+</html>

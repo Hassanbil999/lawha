@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lawha · لوحة — Privacy Policy</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #FBFAF7;
+      --card: #FFFFFF;
+      --text: #14161A;
+      --muted: #5C616B;
+      --rule: #E4E2DC;
+      --accent: #1F6E63;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #121316;
+        --card: #202328;
+        --text: #ECEDEF;
+        --muted: #9BA1AB;
+        --rule: #2A2D33;
+        --accent: #E0A458;
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 48px 24px 96px;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.65 system-ui, sans-serif;
+    }
+
+    main {
+      max-width: 680px;
+      margin-inline: auto;
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      font-size: 30px;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+    }
+
+    .updated {
+      margin: 0 0 40px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    h2 {
+      margin: 40px 0 12px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    p { margin: 0 0 16px; }
+
+    ul {
+      margin: 0 0 16px;
+      padding-inline-start: 22px;
+    }
+
+    li { margin-bottom: 8px; }
+
+    .lede {
+      padding: 20px 22px;
+      border: 1px solid var(--rule);
+      border-radius: 12px;
+      background: var(--card);
+      font-size: 17px;
+    }
+
+    .lede strong { color: var(--accent); }
+
+    dl {
+      margin: 0 0 16px;
+      display: grid;
+      grid-template-columns: max-content 1fr;
+      gap: 8px 20px;
+    }
+
+    dt {
+      font-family: ui-monospace, monospace;
+      font-size: 14px;
+      color: var(--accent);
+    }
+
+    dd { margin: 0; }
+
+    @media (max-width: 520px) {
+      dl { grid-template-columns: 1fr; gap: 2px; }
+      dd { margin-bottom: 12px; }
+    }
+
+    footer {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--rule);
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    code {
+      font-family: ui-monospace, monospace;
+      font-size: 0.9em;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Lawha · لوحة — Privacy Policy</h1>
+    <p class="updated">Last updated: 16 August 2026</p>
+
+    <p class="lede">
+      Lawha does not collect, transmit, sell, or share any personal data.
+      It makes <strong>zero network requests</strong>. Everything it knows about you
+      stays in your own browser, and you can confirm that yourself in
+      DevTools → Network, where it will be empty.
+    </p>
+
+    <h2>What Lawha is</h2>
+    <p>
+      Lawha is a Chrome extension that replaces the new tab page and adds a tab
+      sidebar. It is free, has no accounts, no subscription, and no backend
+      server of any kind.
+    </p>
+
+    <h2>Data we collect</h2>
+    <p>
+      None. There is no analytics, no telemetry, no crash reporting, no
+      advertising identifier, and no remote server for any of it to be sent to.
+      No data ever leaves your device.
+    </p>
+
+    <h2>Data stored locally on your device</h2>
+    <p>
+      The following is saved using Chrome's own storage APIs and stays in your
+      browser. Deleting the extension deletes all of it.
+    </p>
+    <ul>
+      <li>Your shortcuts — the addresses and labels you add</li>
+      <li>Your notes — the text you write</li>
+      <li>Your reading queue — pages you save for later</li>
+      <li>Your scene, palette, layout, language and numeral preferences</li>
+      <li>Your background image, if you choose one from your own disk</li>
+      <li>Tab access timestamps, used to mark a tab you have not looked at in a day</li>
+      <li>A list of currently open tab addresses, so a browser crash does not lose your session</li>
+    </ul>
+    <p>
+      Preferences are small and are stored with Chrome Sync so they follow you
+      between your own signed-in devices — that is Chrome's own sync, under your
+      Google account, not a Lawha server. Everything containing your content —
+      notes, shortcuts, reading queue, images — is stored locally only, and never
+      syncs anywhere.
+    </p>
+
+    <h2>Permissions, and exactly what each is for</h2>
+    <dl>
+      <dt>tabs</dt>
+      <dd>To list the tabs open in the current window in the side panel and to
+        switch, pin, mute or close them; to find them in the command palette; to
+        record the list of open addresses so a crash does not lose your session;
+        and to count them for the toolbar badge if you turn that on. Lawha reads
+        tab titles and addresses; it cannot read the contents of any page.</dd>
+
+      <dt>bookmarks</dt>
+      <dd>To display your bookmark folders on the new tab page and find bookmarks
+        in search.</dd>
+
+      <dt>history</dt>
+      <dd>To display your recently visited pages on the new tab page and find them
+        in search. History is read at the moment the page is drawn and is never
+        stored by Lawha, never aggregated, and never transmitted.</dd>
+
+      <dt>storage</dt>
+      <dd>To save your preferences, notes, shortcuts and reading queue, as
+        described above.</dd>
+
+      <dt>favicon</dt>
+      <dd>To show site icons next to tabs, bookmarks and shortcuts. These come
+        from Chrome's own local favicon cache — no icon is fetched from the
+        internet.</dd>
+
+      <dt>sidePanel</dt>
+      <dd>To display the sidebar.</dd>
+    </dl>
+    <p>
+      Lawha requests <strong>no host permissions</strong>. It cannot read, modify,
+      or inject anything into the web pages you visit, and it has no content
+      scripts.
+    </p>
+
+    <h2>Network requests</h2>
+    <p>
+      Lawha makes none. Fonts, icons and every other asset ship inside the
+      extension. Colours are computed on your machine. The extension's content
+      security policy permits no connection to any remote origin at all.
+    </p>
+
+    <h2>Scenes you import</h2>
+    <p>
+      A Scene is a plain JSON file describing colours and layout. Importing one
+      from someone else changes only how Lawha looks. A Scene contains no code
+      and has no route to your notes, shortcuts, or any other data — that
+      boundary is enforced in the extension's own storage layer, not left to
+      convention.
+    </p>
+
+    <h2>Children</h2>
+    <p>
+      Lawha collects no data from anyone, of any age.
+    </p>
+
+    <h2>Changes to this policy</h2>
+    <p>
+      If this policy ever changes, the date at the top of this page changes with
+      it. Material changes to what is stored or why will be described here rather
+      than quietly swapped in.
+    </p>
+
+    <h2>Contact</h2>
+    <p>
+      Questions about this policy or about Lawha's handling of data:
+      <a href="mailto:hello@lawha.app">hello@lawha.app</a>
+    </p>
+
+    <footer>
+      Lawha · لوحة — a calm new tab that's yours to design.
+    </footer>
+  </main>
+</body>
+</html>

@@ -1,0 +1,109 @@
+{
+  "lawha": true,
+  "schemaVersion": 2,
+  "kind": "scene",
+  "meta": {
+    "id": "warsha",
+    "name": "Warsha",
+    "nameAr": "ورشة",
+    "author": "",
+    "remixOf": null,
+    "created": "2026-08-16T10:30:00Z",
+    "note": "A workbench. A standing bookmark rail, dense content, search always on. For people with two hundred bookmarks who live in the browser.",
+    "tags": [
+      "dense",
+      "light",
+      "creative"
+    ]
+  },
+  "palette": "waraq",
+  "grid": {
+    "maxWidth": 1440,
+    "gap": 5,
+    "columns": "260px 1fr",
+    "areas": [
+      "rail top",
+      "rail main",
+      "rail notes"
+    ],
+    "breakpoints": {
+      "860": {
+        "columns": "1fr",
+        "areas": [
+          "top",
+          "rail",
+          "main",
+          "notes"
+        ]
+      }
+    }
+  },
+  "regions": {
+    "rail": {
+      "modules": [
+        "bookmarks",
+        "shortcuts",
+        "later"
+      ],
+      "align": "stretch"
+    },
+    "top": {
+      "modules": [
+        "search"
+      ],
+      "align": "stretch"
+    },
+    "main": {
+      "modules": [
+        "recent"
+      ],
+      "align": "stretch"
+    },
+    "notes": {
+      "modules": [
+        "notes"
+      ],
+      "align": "stretch"
+    }
+  },
+  "modules": {
+    "clock": {
+      "variant": "off",
+      "seconds": false,
+      "greeting": false,
+      "date": false
+    },
+    "waqt": {
+      "variant": "off"
+    },
+    "shortcuts": {
+      "variant": "circles",
+      "max": 9,
+      "perRow": 3,
+      "labels": false
+    },
+    "recent": {
+      "variant": "compact",
+      "max": 18,
+      "showDomain": true,
+      "showTime": true
+    },
+    "bookmarks": {
+      "variant": "tree",
+      "max": 12,
+      "expandable": true
+    },
+    "notes": {
+      "variant": "strip",
+      "max": 6
+    },
+    "later": {
+      "variant": "count"
+    },
+    "search": {
+      "variant": "bar"
+    }
+  },
+  "density": "compact",
+  "sectionLabels": true
+}

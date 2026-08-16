@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-palette="waraq" data-density="comfortable" data-labels="on">
+<head>
+  <meta charset="utf-8">
+  <title>Lawha — self test</title>
+  <link rel="stylesheet" href="../shared/fonts.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="selftest.css">
+</head>
+<body class="st">
+  <header class="st-head">
+    <h1 class="st-title">Lawha — self test</h1>
+    <p class="st-sub">
+      The data preservation contract, run against real storage and the real
+      render path. Your own notes, shortcuts and reading queue are snapshotted
+      before the run and restored after it.
+    </p>
+    <button class="l-btn l-btn-primary" type="button" id="run">Run the test</button>
+  </header>
+
+  <ol class="st-results" id="results"></ol>
+
+  <p class="st-verdict" id="verdict" hidden></p>
+
+  <!-- The real new tab page in preview mode. Assertions are made against what
+       it actually draws, not against a second implementation of it. -->
+  <div class="st-stage">
+    <iframe class="st-frame" id="preview" title="render target"
+            src="../newtab/newtab.html?preview=1"></iframe>
+  </div>
+
+  <script type="module" src="selftest.js"></script>
+</body>
+</html>

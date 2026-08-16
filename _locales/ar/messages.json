@@ -1,0 +1,14 @@
+{
+  "appName": {
+    "message": "لوحة — Lawha",
+    "description": "Extension name as shown in Chrome."
+  },
+  "appDesc": {
+    "message": "متصفحك لوحةً تصمّمها. Your browser as a canvas you design.",
+    "description": "Extension description as shown in Chrome."
+  },
+  "cmdToggleSidebar": { "message": "إظهار الشريط الجانبي" },
+  "cmdPalette": { "message": "فتح لوحة الأوامر" },
+  "cmdSaveLater": { "message": "احفظ الصفحة لاحقًا" },
+  "cmdFocusMode": { "message": "تبديل وضع التركيز" }
+}

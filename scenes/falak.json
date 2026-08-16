@@ -1,0 +1,92 @@
+{
+  "lawha": true,
+  "schemaVersion": 2,
+  "kind": "scene",
+  "meta": {
+    "id": "falak",
+    "name": "Falak",
+    "nameAr": "فلك",
+    "author": "",
+    "remixOf": null,
+    "created": "2026-08-16T10:30:00Z",
+    "note": "Shortcuts orbit the hour. Visually the boldest scene and functionally the sparest.",
+    "tags": [
+      "dark",
+      "creative",
+      "focus"
+    ]
+  },
+  "palette": "hibr",
+  "grid": {
+    "maxWidth": 880,
+    "gap": 6,
+    "columns": "1fr",
+    "areas": [
+      "header",
+      "orbit",
+      "foot"
+    ],
+    "breakpoints": {}
+  },
+  "regions": {
+    "header": {
+      "modules": [
+        "waqt"
+      ],
+      "align": "stretch"
+    },
+    "orbit": {
+      "modules": [
+        "clock",
+        "shortcuts"
+      ],
+      "align": "center"
+    },
+    "foot": {
+      "modules": [
+        "recent"
+      ],
+      "align": "stretch"
+    }
+  },
+  "modules": {
+    "clock": {
+      "variant": "ring",
+      "seconds": false,
+      "greeting": true,
+      "date": false
+    },
+    "waqt": {
+      "variant": "dots"
+    },
+    "shortcuts": {
+      "variant": "ring",
+      "max": 8,
+      "perRow": 8,
+      "labels": false
+    },
+    "recent": {
+      "variant": "compact",
+      "max": 5,
+      "showDomain": false,
+      "showTime": false
+    },
+    "bookmarks": {
+      "variant": "folders",
+      "max": 6,
+      "expandable": true
+    },
+    "notes": {
+      "variant": "off",
+      "max": 6
+    },
+    "later": {
+      "variant": "off"
+    },
+    "search": {
+      "variant": "icon"
+    }
+  },
+  "density": "comfortable",
+  "sectionLabels": false
+}

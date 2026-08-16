@@ -1,0 +1,166 @@
+/* Lawha — design tokens.
+   Everything downstream reads from here. Nothing below this file hardcodes a
+   colour, a shadow, or a spacing value. */
+
+:root {
+  /* ---- Type scale -------------------------------------------------------
+     Arabic script needs more vertical room than Latin at the same optical
+     size. These are floors, not suggestions. */
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-md: 17px;
+  --text-lg: 22px;
+  --text-xl: 34px;
+  --text-2xl: 56px;
+
+  --leading-tight: 1.35;
+  --leading-base: 1.65;
+  --leading-loose: 1.8;
+
+  --tracking-tight: -0.015em; /* Latin display only */
+  --tracking-wide: 0.06em;    /* eyebrow labels */
+
+  /* ---- Space ------------------------------------------------------------
+     4px grid. `--density` scales the whole system at once; authored values
+     are always multiples of 4 before the multiplier lands. */
+  --density: 1;
+  --space-1: calc(4px * var(--density));
+  --space-2: calc(8px * var(--density));
+  --space-3: calc(12px * var(--density));
+  --space-4: calc(16px * var(--density));
+  --space-5: calc(24px * var(--density));
+  --space-6: calc(32px * var(--density));
+  --space-7: calc(48px * var(--density));
+  --space-8: calc(64px * var(--density));
+  --space-9: calc(96px * var(--density));
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+  --hairline: 1px;
+
+  /* ---- Direction --------------------------------------------------------
+     Multiply any signed translate by this instead of reaching for
+     `row-reverse` or a physical property. */
+  --dir: 1;
+
+  /* ---- Motion ----------------------------------------------------------- */
+  --ease-out: cubic-bezier(0.2, 0, 0.2, 1);
+  --ease-enter: cubic-bezier(0.2, 0, 0, 1);
+  --dur-fast: 120ms;
+  --dur-quick: 160ms;
+  --dur-base: 200ms;
+  --dur-slow: 280ms;
+
+  /* ---- Background composition ------------------------------------------
+     `--bg-layer` is whatever the Background setting resolved to: the flat
+     canvas colour, a gradient, or an image. `--bg-scrim` sits between that
+     layer and the content. */
+  --bg-layer: var(--bg-canvas);
+  --bg-scrim: transparent;
+  --bg-size: auto;
+  --bg-position: 50% 50%;
+
+  /* ---- Waqt ------------------------------------------------------------- */
+  --waqt-p: 0;
+}
+
+:root[lang="ar"] {
+  /* Negative letter-spacing breaks Arabic glyph joining. */
+  --tracking-tight: 0;
+}
+
+:root[dir="rtl"] {
+  --dir: -1;
+}
+
+:root[data-density="compact"] { --density: 0.75; }
+:root[data-density="comfortable"] { --density: 1; }
+:root[data-density="airy"] { --density: 1.4; }
+
+/* ---- Palettes -----------------------------------------------------------
+   `waraq` also serves as the bare `:root` default so a page renders correctly
+   in the first frame, before the stored palette has been read back.
+
+   Palettes are keyed off a plain attribute selector rather than `:root[...]`
+   so any element can carry one. That is what lets the builder show a live
+   preview in a different palette than the page around it, and what lets the
+   contrast checker measure a palette by reading it off a probe element
+   instead of keeping a second copy of these values in JavaScript. */
+
+:root,
+[data-palette="waraq"] {
+  --bg-canvas: #FBFAF7;
+  --bg-raised: #F2F1ED;
+  --bg-card: #FFFFFF;
+  --text-primary: #14161A;
+  --text-secondary: #5C616B;
+  --text-muted: #9AA0AB;
+  --accent: #1F6E63;
+  --accent-soft: #D6E8E4;
+  --accent-text: #FFFFFF;
+  --border: #E4E2DC;
+  --shadow-color: 20 22 26;
+}
+
+[data-palette="hibr"] {
+  --bg-canvas: #121316;
+  --bg-raised: #1A1C20;
+  --bg-card: #202328;
+  --text-primary: #ECEDEF;
+  --text-secondary: #9BA1AB;
+  --text-muted: #5F6570;
+  --accent: #E0A458;
+  --accent-soft: #3A2E1F;
+  --accent-text: #121316;
+  --border: #2A2D33;
+  --shadow-color: 0 0 0;
+}
+
+[data-palette="nakhla"] {
+  --bg-canvas: #F4F5F0;
+  --bg-raised: #E9EBE2;
+  --bg-card: #FDFDFB;
+  --text-primary: #1B1F16;
+  --text-secondary: #5A6150;
+  --text-muted: #969C8B;
+  --accent: #5C7346;
+  --accent-soft: #DEE6D2;
+  --accent-text: #FFFFFF;
+  --border: #DDE0D4;
+  --shadow-color: 27 31 22;
+}
+
+[data-palette="sadaf"] {
+  --bg-canvas: #F6F5F9;
+  --bg-raised: #ECEAF2;
+  --bg-card: #FFFFFF;
+  --text-primary: #191622;
+  --text-secondary: #625C72;
+  --text-muted: #A29CB2;
+  --accent: #6B4FA8;
+  --accent-soft: #E3DCF2;
+  --accent-text: #FFFFFF;
+  --border: #DFDBEA;
+  --shadow-color: 25 22 34;
+}
+
+/* Shadows are derived from the palette's own shadow colour, never hardcoded,
+   so a dark palette casts a dark shadow rather than a grey smear. Declared
+   alongside the palettes so a scoped preview gets its own, not the page's. */
+:root,
+[data-palette] {
+  --tile-blend: normal;
+  --shadow-sm: 0 1px 2px rgb(var(--shadow-color) / 0.05);
+  --shadow-md: 0 2px 8px rgb(var(--shadow-color) / 0.07);
+  --shadow-lg: 0 8px 24px rgb(var(--shadow-color) / 0.10);
+}
+
+/* Identity tiles come out of a domain hash at a fixed light lightness, which
+   is right on paper and wrong on ink. Rather than fork the hash — a site's
+   hue should be the same everywhere — dark palettes composite that gradient
+   against the card colour so only its weight changes. Placed last so it wins
+   the equal-specificity tie with the block above. */
+[data-palette="hibr"] { --tile-blend: multiply; }

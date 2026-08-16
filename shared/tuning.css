@@ -1,0 +1,306 @@
+/* Lawha — the tuning panel.
+ *
+ * Loaded by both the side panel and the popup, which host the same controls at
+ * different widths. Everything is a label above a row of controls; a settings
+ * surface that needs a layout is a settings surface with too much in it. */
+
+.tune {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-4);
+}
+
+.tune-group {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.tune-group > .l-label {
+  margin-block-end: 0;
+}
+
+.tune-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-block-size: 28px;
+}
+
+.tune-row-label {
+  display: grid;
+  gap: 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  text-align: start;
+}
+
+.tune-row-note {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+/* ---- Palette swatches --------------------------------------------------- */
+
+.tune-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tune-swatch,
+.tune-custom-wrap {
+  position: relative;
+  inline-size: 32px;
+  block-size: 32px;
+  border-radius: var(--radius-pill);
+  border: var(--hairline) solid var(--border);
+  background-color: var(--bg-canvas);
+  background-image: linear-gradient(135deg, var(--bg-canvas) 50%, var(--accent) 50%);
+  transition: box-shadow var(--dur-quick) var(--ease-out);
+}
+
+.tune-swatch[aria-checked="true"],
+.tune-custom-wrap[data-selected="true"] {
+  box-shadow: 0 0 0 2px var(--bg-canvas), 0 0 0 3px var(--accent);
+}
+
+/* "Whatever the scene says" — an empty ring, not a colour. */
+.tune-swatch-inherit {
+  background-image: none;
+  border-style: dashed;
+}
+
+.tune-swatch-auto {
+  background-image: linear-gradient(135deg, #FBFAF7 50%, #121316 50%);
+}
+
+/* The custom accent: the colour input is the swatch. */
+.tune-custom-wrap {
+  overflow: hidden;
+  background-image: none;
+  display: block;
+}
+
+.tune-custom {
+  inline-size: 200%;
+  block-size: 200%;
+  margin: -25%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.tune-custom::-webkit-color-swatch-wrapper { padding: 0; }
+.tune-custom::-webkit-color-swatch { border: 0; }
+
+/* A traffic light in the corner: green from 4.5:1, amber from 3.0, red below.
+   After auto-correction the red should never appear — if it does, something
+   upstream let an uncorrected palette through. */
+.tune-dot {
+  position: absolute;
+  inset-block-end: -1px;
+  inset-inline-end: -1px;
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--bg-canvas);
+  pointer-events: none;
+}
+
+.tune-dot[data-level="pass"] { background-color: #3E8E5A; }
+.tune-dot[data-level="warn"] { background-color: #C98A2E; }
+.tune-dot[data-level="fail"] { background-color: #C0492F; }
+
+/* "I adjusted this slightly." One pulse, 400ms, then it settles. */
+.tune-custom-wrap.is-adjusted {
+  animation: tune-adjusted 400ms var(--ease-out);
+}
+
+@keyframes tune-adjusted {
+  0% { box-shadow: 0 0 0 2px var(--bg-canvas), 0 0 0 3px var(--accent); }
+  45% { box-shadow: 0 0 0 2px var(--bg-canvas), 0 0 0 5px var(--accent); }
+  100% { box-shadow: 0 0 0 2px var(--bg-canvas), 0 0 0 3px var(--accent); }
+}
+
+/* ---- Segmented controls ------------------------------------------------- */
+
+.tune-segment {
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-raised);
+}
+
+.tune-seg {
+  flex: 1 1 0;
+  min-inline-size: 0;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: background-color var(--dur-quick) var(--ease-out),
+              color var(--dur-quick) var(--ease-out);
+}
+
+.tune-seg[aria-checked="true"] {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---- Background --------------------------------------------------------- */
+
+.tune-bg-preview {
+  block-size: 56px;
+  border-radius: var(--radius-sm);
+  border: var(--hairline) solid var(--border);
+  background: var(--bg-layer);
+  background-size: var(--bg-size);
+  background-position: var(--bg-position);
+  background-repeat: no-repeat;
+}
+
+.tune-bg-preview[data-bg="gradient"] {
+  background-size: 220% 220%;
+  animation: l-drift 24s ease-in-out infinite;
+}
+
+.tune-bg-editor:empty {
+  display: none;
+}
+
+.tune-bg-editor {
+  display: grid;
+  gap: var(--space-3);
+  padding-block-start: var(--space-1);
+}
+
+.tune-presets {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+
+.tune-preset {
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  border: var(--hairline) solid var(--border);
+  background-image: var(--preset);
+}
+
+.tune-colors {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.tune-color {
+  flex: 1 1 0;
+  block-size: 28px;
+  padding: 0;
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-sm);
+  background: none;
+  cursor: pointer;
+}
+
+.tune-range {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  accent-color: var(--accent);
+}
+
+.tune-file {
+  cursor: pointer;
+  justify-content: center;
+}
+
+/* ---- Istikhraj toggle --------------------------------------------------- */
+
+.tune-toggle {
+  flex: none;
+  position: relative;
+  inline-size: 36px;
+  block-size: 20px;
+  border-radius: var(--radius-pill);
+  border: var(--hairline) solid var(--border);
+  background-color: var(--bg-raised);
+  transition: background-color var(--dur-quick) var(--ease-out),
+              border-color var(--dur-quick) var(--ease-out);
+}
+
+.tune-toggle::after {
+  content: "";
+  position: absolute;
+  /* Centred on the block axis by ratio rather than by a magic offset, and set
+     in one space unit on the inline axis, so every authored number here is on
+     the 4px grid. The knob travels 12px, which leaves the same 4px at whichever
+     end it is resting against. */
+  inset-block-start: 50%;
+  inset-inline-start: var(--space-1);
+  translate: 0 -50%;
+  inline-size: 14px;
+  block-size: 14px;
+  border-radius: var(--radius-pill);
+  background-color: var(--text-muted);
+  transition: transform var(--dur-quick) var(--ease-out),
+              background-color var(--dur-quick) var(--ease-out);
+}
+
+.tune-toggle[aria-checked="true"] {
+  background-color: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.tune-toggle[aria-checked="true"]::after {
+  background-color: var(--accent);
+  /* 12px along the inline axis, whichever way that runs. Composes with the
+     block-axis centring above: `translate` is applied before `transform`. */
+  transform: translateX(calc(12px * var(--dir)));
+}
+
+/* ---- Gallery link ------------------------------------------------------- */
+
+.tune-gallery {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  inline-size: 100%;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  border: var(--hairline) solid var(--border);
+  background-color: var(--bg-card);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  transition: background-color var(--dur-quick) var(--ease-out),
+              border-color var(--dur-quick) var(--ease-out);
+}
+
+.tune-gallery:hover {
+  background-color: var(--bg-raised);
+  border-color: var(--accent);
+}
+
+.tune-gallery span {
+  flex: 1 1 auto;
+  text-align: start;
+}
+
+.tune-gallery svg {
+  flex: none;
+  inline-size: 16px;
+  block-size: 16px;
+  color: var(--text-muted);
+}
+
+/* The trailing chevron points the way the page reads. */
+.tune-gallery svg:last-child {
+  scale: var(--dir) 1;
+}

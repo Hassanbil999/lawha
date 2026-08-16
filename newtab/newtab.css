@@ -1,0 +1,1232 @@
+/* Lawha — the new tab surface and every module variant it can draw.
+ *
+ * Layout is entirely logical-property based. Nothing here says left, right,
+ * margin-left or row-reverse; direction comes from `dir` on <html> and from
+ * var(--dir) for the few places a sign has to be flipped by hand. */
+
+/* Chrome draws a "Customize Chrome" footer over extension new tab pages. When
+   it lands inside our document these rules take it out; when the browser paints
+   it as its own chrome, no page CSS can reach it and the fix is the
+   chrome://flags/#ntp-footer switch, which the README explains. Either way the
+   page below never scrolls it into view. */
+#ntp-footer,
+ntp-app,
+cr-button,
+[slot="footer"] {
+  display: none !important;
+}
+
+html,
+body {
+  block-size: 100%;
+  overflow: hidden;
+}
+
+.scene-scroll {
+  block-size: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.scene {
+  display: grid;
+  /* max-inline-size, gap, grid-template-columns and grid-template-areas are
+     written by applyGrid() from the active Scene. */
+  margin-inline: auto;
+  padding: var(--space-7) var(--space-6) var(--space-8);
+  min-block-size: 100%;
+  align-content: start;
+}
+
+.l-region {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-inline-size: 0;
+}
+
+.l-slot {
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+/* A centred region centres its slots too, rather than leaving full-width
+   children that merely happen to contain centred text. */
+.l-region[data-align="center"] > .l-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.l-region[data-align="center"] > .l-slot > * {
+  inline-size: auto;
+  max-inline-size: 100%;
+}
+
+/* ...except the arc, which is meant to span whatever it is given. */
+.l-region[data-align="center"] > .l-slot > .waqt {
+  inline-size: 100%;
+}
+
+.l-module {
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+/* A region holding a ring stacks its children in one cell, so shortcuts can
+   orbit a clock that is a sibling rather than a parent. */
+.l-region:has(.shortcuts-ring) {
+  display: grid;
+  place-items: center;
+}
+
+.l-region:has(.shortcuts-ring) > .l-slot {
+  grid-area: 1 / 1;
+}
+
+/* The clock needs room beneath it — the space is the point. Not applied when
+   the region is a ring stack, where the clock sits inside the orbit and a
+   bottom margin would just shove the whole arrangement off centre. */
+.l-region:not(:has(.shortcuts-ring)) > .l-slot[data-slot="clock"] {
+  margin-block-end: var(--space-7);
+}
+
+/* Focus mode: the time and the day, nothing else. Everything stays in
+   storage and in the DOM — this is a view, not a purge. */
+:root[data-focus="on"] .l-slot:not([data-slot="clock"]):not([data-slot="waqt"]) {
+  display: none;
+}
+
+/* The one mark focus mode leaves: a word in the corner, in the quietest colour
+   and the smallest size the type scale has. Without it there is no way to tell
+   a focused canvas from a Scene that simply has nothing in it, and no hint that
+   there is a way back. */
+.focus-flag {
+  display: none;
+  position: fixed;
+  inset-block-end: var(--space-4);
+  inset-inline-end: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+:root[data-focus="on"] .focus-flag {
+  display: block;
+}
+
+/* ==========================================================================
+   Clock
+   ========================================================================== */
+
+.clock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-inline-size: 0;
+}
+
+.clock-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.clock-time {
+  /* Weight 600 lives here and on the active tab title, nowhere else. It is set
+     in --font-body because 600 is a weight we actually bundle; asking Tajawal
+     for 600 when only 500 and 700 ship would silently render 700. */
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-primary);
+}
+
+.clock-time.is-fresh {
+  animation: l-fade-in var(--dur-base) ease-out;
+}
+
+@keyframes l-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.clock-greeting {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--text-lg);
+  line-height: var(--leading-tight);
+  color: var(--text-secondary);
+}
+
+.clock-date {
+  font-size: var(--text-base);
+  color: var(--text-muted);
+}
+
+.clock-minimal {
+  align-items: flex-start;
+  text-align: start;
+}
+
+.clock-minimal .clock-time { font-size: var(--text-xl); }
+.clock-minimal .clock-greeting { font-size: var(--text-base); }
+.clock-minimal .clock-date { font-size: var(--text-sm); }
+
+.clock-monumental {
+  align-items: center;
+  text-align: center;
+}
+
+.clock-monumental .clock-time { font-size: var(--text-2xl); }
+.clock-monumental .clock-text { align-items: center; }
+
+/* Ring: dial and reading share a single grid cell. */
+.clock-ring {
+  display: grid;
+  place-items: center;
+}
+
+.clock-ring > * { grid-area: 1 / 1; }
+
+.clock-ring .clock-text {
+  align-items: center;
+  text-align: center;
+}
+
+.clock-ring .clock-time { font-size: var(--text-xl); }
+.clock-ring .clock-greeting { font-size: var(--text-sm); }
+.clock-ring .clock-date { display: none; }
+
+.clock-dial {
+  inline-size: 200px;
+  block-size: 200px;
+}
+
+.clock-dial-track {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.clock-dial-sweep {
+  fill: none;
+  stroke: var(--text-primary);
+  stroke-width: 1;
+  opacity: 0.15;
+}
+
+.clock-dial-now {
+  fill: var(--accent);
+}
+
+/* ==========================================================================
+   Waqt — the one loud thing, and it is a hairline
+   ========================================================================== */
+
+.waqt-arc {
+  inline-size: 100%;
+  block-size: 40px;
+}
+
+/* Time runs the way the page reads. */
+:root[dir="rtl"] .waqt-arc {
+  transform: scaleX(-1);
+}
+
+.waqt-track {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.waqt-past {
+  fill: none;
+  stroke: var(--text-primary);
+  stroke-width: 1;
+  opacity: 0.15;
+  vector-effect: non-scaling-stroke;
+}
+
+.waqt-now {
+  fill: var(--accent);
+}
+
+.waqt-bar {
+  position: relative;
+  inline-size: 100%;
+  block-size: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.waqt-bar::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  block-size: 1px;
+  background-color: var(--border);
+}
+
+.waqt-bar-fill {
+  position: absolute;
+  inset-inline-start: 0;
+  inline-size: calc(var(--waqt-p, 0) * 100%);
+  block-size: 1px;
+  background-color: var(--text-primary);
+  opacity: 0.15;
+}
+
+.waqt-bar-dot {
+  position: absolute;
+  inset-inline-start: calc(var(--waqt-p, 0) * 100%);
+  inline-size: 4px;
+  block-size: 4px;
+  border-radius: var(--radius-pill);
+  background-color: var(--accent);
+  transform: translateX(calc(-2px * var(--dir)));
+}
+
+.waqt-dots {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  inline-size: 100%;
+  block-size: 8px;
+  /* In Falak the dots sit above the shortcut ring, and once a narrow viewport
+     collapses the grid to one column they land almost on top of it. */
+  margin-block-end: var(--space-5);
+}
+
+.waqt-dot {
+  inline-size: 3px;
+  block-size: 3px;
+  border-radius: var(--radius-pill);
+  background-color: var(--border);
+}
+
+.waqt-dot[data-state="past"] {
+  background-color: var(--text-primary);
+  opacity: 0.15;
+}
+
+.waqt-dot[data-state="now"] {
+  inline-size: 4px;
+  block-size: 4px;
+  background-color: var(--accent);
+  opacity: 1;
+}
+
+/* ==========================================================================
+   Shortcuts
+   ========================================================================== */
+
+.shortcuts {
+  display: grid;
+  gap: var(--space-4) var(--space-3);
+}
+
+.shortcut {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  min-inline-size: 0;
+  color: var(--text-secondary);
+}
+
+.shortcut-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  background-color: var(--bg-card);
+  border: var(--hairline) solid var(--border);
+  transition: transform var(--dur-quick) var(--ease-out),
+              box-shadow var(--dur-quick) var(--ease-out),
+              border-color var(--dur-quick) var(--ease-out);
+}
+
+.shortcut:hover .shortcut-mark {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--text-muted);
+}
+
+.shortcut-label {
+  max-inline-size: 100%;
+  font-size: var(--text-xs);
+  line-height: var(--leading-tight);
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.shortcut.is-dragging { opacity: 0.4; }
+
+.shortcut.is-drop .shortcut-mark {
+  background-color: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+/* circles */
+.shortcuts-circles {
+  grid-template-columns: repeat(var(--per-row, 8), minmax(0, 1fr));
+  justify-items: center;
+}
+
+.shortcuts-circles .shortcut-mark {
+  inline-size: 44px;
+  block-size: 44px;
+  border-radius: var(--radius-pill);
+}
+
+/* A long domain must not be allowed to set the column width — the grid rhythm
+   is worth more than the last six characters of a label. */
+.shortcuts-circles .shortcut-label,
+.shortcuts-strip .shortcut-label,
+.shortcuts-ring .shortcut-label {
+  max-inline-size: 56px;
+}
+
+/* squares */
+.shortcuts-squares {
+  grid-template-columns: repeat(var(--per-row, 8), minmax(0, 1fr));
+}
+
+.shortcuts-squares .shortcut {
+  gap: 0;
+}
+
+.shortcuts-squares .shortcut-mark {
+  position: relative;
+  inline-size: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  background-image: var(--tile-gradient);
+  background-color: var(--bg-card);
+  background-blend-mode: var(--tile-blend);
+}
+
+.shortcuts-squares .shortcut-label {
+  position: absolute;
+  inset-block-end: var(--space-2);
+  inset-inline: var(--space-2);
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.shortcuts-squares .shortcut {
+  position: relative;
+}
+
+/* strip — one scrolling row */
+.shortcuts-strip {
+  display: flex;
+  gap: var(--space-4);
+  overflow-x: auto;
+  padding-block-end: var(--space-2);
+  scrollbar-width: none;
+}
+
+.shortcuts-strip .shortcut {
+  flex: none;
+  inline-size: 64px;
+}
+
+.shortcuts-strip .shortcut-mark {
+  inline-size: 44px;
+  block-size: 44px;
+  border-radius: var(--radius-md);
+}
+
+/* ring — orbiting whatever shares the region */
+.shortcuts-ring {
+  position: relative;
+  display: block;
+  inline-size: min(440px, 80vw);
+  aspect-ratio: 1;
+}
+
+.shortcuts-ring .shortcut {
+  position: absolute;
+  inset-inline-start: var(--ring-x, 50%);
+  inset-block-start: var(--ring-y, 50%);
+  /* -50% in the inline direction, whichever direction that is today. */
+  transform: translateX(calc(-50% * var(--dir))) translateY(-50%);
+}
+
+.shortcuts-ring .shortcut-mark {
+  inline-size: 44px;
+  block-size: 44px;
+  border-radius: var(--radius-pill);
+}
+
+.shortcuts-ring .shortcut-label {
+  display: none;
+}
+
+/* list */
+.shortcuts-list {
+  display: block;
+}
+
+.shortcuts-list-add {
+  color: var(--text-muted);
+}
+
+/* The dashed ring is drawn in --text-muted rather than --border. On Ink,
+   --border (#2A2D33) against --bg-canvas (#121316) is about 1.6:1 — the button
+   was there and nobody could see it. --text-muted clears 3.5:1 on all four
+   palettes, which is the difference between a hint and a hidden control. */
+.shortcut-add .shortcut-mark {
+  color: var(--text-muted);
+  border-color: var(--text-muted);
+  border-style: dashed;
+  background-color: transparent;
+}
+
+.shortcut-add:hover .shortcut-mark {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* The add/edit dialog */
+.shortcut-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.shortcut-form .l-label {
+  margin-block-end: 0;
+  margin-block-start: var(--space-2);
+}
+
+.shortcut-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-block-start: var(--space-4);
+}
+
+/* ==========================================================================
+   Recent
+   ========================================================================== */
+
+.recent-domain {
+  flex: none;
+  max-inline-size: 30%;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-list .l-row {
+  min-block-size: 36px;
+}
+
+.recent-compact .l-row {
+  min-block-size: 24px;
+  padding-block: 0;
+  gap: var(--space-2);
+}
+
+.recent-compact .l-row-title {
+  font-size: var(--text-xs);
+}
+
+.recent-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: var(--space-3);
+}
+
+.recent-feed {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.recent-feed-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-block-end: var(--space-2);
+}
+
+.recent-feed-domain {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-feed-list {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.recent-feed-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-1) 0;
+}
+
+.recent-feed-link:hover .l-row-title {
+  color: var(--accent);
+}
+
+/* ==========================================================================
+   Bookmarks
+   ========================================================================== */
+
+/* folders — a 2x2 favicon preview over the folder name */
+.bookmarks-folders {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: var(--space-3);
+}
+
+.bookmark-folder {
+  position: relative;
+  padding: var(--space-3);
+}
+
+.bookmark-folder-toggle {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: var(--radius-md);
+}
+
+.bookmark-preview {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-raised);
+  margin-block-end: var(--space-3);
+}
+
+.bookmark-folder-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.bookmark-folder-name {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  font-size: var(--text-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bookmark-links {
+  padding-block-start: var(--space-2);
+}
+
+/* shelf */
+.bookmarks-shelf {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.bookmark-shelf-rail {
+  display: flex;
+  gap: var(--space-3);
+  overflow-x: auto;
+  padding-block-end: var(--space-2);
+}
+
+.bookmark-shelf-item {
+  flex: none;
+  inline-size: 132px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: var(--hairline) solid var(--border);
+  background-image: var(--tile-gradient);
+  background-color: var(--bg-card);
+  background-blend-mode: var(--tile-blend);
+  transition: transform var(--dur-quick) var(--ease-out),
+              box-shadow var(--dur-quick) var(--ease-out);
+}
+
+.bookmark-shelf-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.bookmark-shelf-title {
+  font-size: var(--text-xs);
+  line-height: var(--leading-tight);
+  color: var(--text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* tree — the disclosure mechanics live in base.css, shared with the tab tree */
+.bookmark-branch .bookmark-links {
+  padding-inline-start: var(--space-5);
+}
+
+/* tiles */
+.bookmarks-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: var(--space-3);
+}
+
+/* columns */
+.bookmarks-columns {
+  columns: 3 180px;
+  column-gap: var(--space-6);
+}
+
+.bookmark-column {
+  break-inside: avoid;
+  margin-block-end: var(--space-5);
+}
+
+.bookmark-column-list {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.bookmark-column-link {
+  display: block;
+  font-size: var(--text-sm);
+  line-height: var(--leading-base);
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bookmark-column-link:hover {
+  color: var(--accent);
+}
+
+/* ==========================================================================
+   Notes
+   ========================================================================== */
+
+.note {
+  position: relative;
+  padding: var(--space-3);
+  min-block-size: 96px;
+}
+
+.note-body {
+  inline-size: 100%;
+  min-block-size: 72px;
+  border: 0;
+  padding: 0;
+  background: none;
+  resize: none;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  line-height: var(--leading-base);
+  color: var(--text-primary);
+  text-align: start;
+}
+
+.note-body:focus {
+  outline: none;
+}
+
+.note-remove {
+  position: absolute;
+  inset-block-start: var(--space-1);
+  inset-inline-end: var(--space-1);
+  opacity: 0;
+  transition: opacity var(--dur-quick) var(--ease-out);
+}
+
+.note:hover .note-remove,
+.note:focus-within .note-remove {
+  opacity: 1;
+}
+
+.note-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  border-style: dashed;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.note-add:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.notes-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-3);
+}
+
+.notes-strip {
+  display: flex;
+  gap: var(--space-3);
+  overflow-x: auto;
+  padding-block-end: var(--space-2);
+}
+
+.notes-strip .note {
+  flex: none;
+  inline-size: 220px;
+}
+
+/* stack — a few pixels of offset each. Paper on paper, not a fanned deck. */
+.notes-stack {
+  position: relative;
+  min-block-size: 132px;
+}
+
+.notes-stack .note {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: min(280px, 100%);
+  transform: translateY(calc(var(--stack-index) * 6px))
+             translateX(calc(var(--stack-index) * 4px * var(--dir)));
+  z-index: var(--stack-depth);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.notes-stack .note:hover,
+.notes-stack .note:focus-within {
+  transform: translateY(calc(var(--stack-index) * 6px - 4px))
+             translateX(calc(var(--stack-index) * 4px * var(--dir)));
+  z-index: 99;
+}
+
+.notes-stack .note-add {
+  position: relative;
+  inline-size: 44px;
+  block-size: 44px;
+  min-block-size: 0;
+  margin-inline-start: auto;
+}
+
+/* ==========================================================================
+   Later
+   ========================================================================== */
+
+.later-count {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.later-count-number {
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.later-count-label {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.later-count:hover .later-count-number {
+  color: var(--accent);
+}
+
+.later-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: var(--space-3);
+}
+
+/* ==========================================================================
+   Search
+   ========================================================================== */
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-pill);
+  background-color: var(--bg-card);
+  color: var(--text-muted);
+  transition: border-color var(--dur-quick) var(--ease-out),
+              color var(--dur-quick) var(--ease-out);
+}
+
+.search:hover {
+  border-color: var(--text-muted);
+  color: var(--text-secondary);
+}
+
+.search svg {
+  flex: none;
+  inline-size: 16px;
+  block-size: 16px;
+}
+
+.search-placeholder {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  font-size: var(--text-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: start;
+}
+
+.search-bar {
+  inline-size: 100%;
+  max-inline-size: 520px;
+}
+
+/* icon — collapsed to a circle until you reach for it */
+.search-icon {
+  inline-size: 36px;
+  block-size: 36px;
+  padding: 0;
+  justify-content: center;
+  overflow: hidden;
+  transition: inline-size var(--dur-base) var(--ease-enter),
+              padding var(--dur-base) var(--ease-enter);
+}
+
+.search-icon .search-placeholder,
+.search-icon .search-key {
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.search-icon:hover,
+.search-icon:focus-visible {
+  inline-size: min(340px, 100%);
+  padding-inline: var(--space-4);
+  justify-content: flex-start;
+}
+
+.search-icon:hover .search-placeholder,
+.search-icon:focus-visible .search-placeholder {
+  opacity: 1;
+}
+
+.search-key {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  padding: 0 var(--space-2);
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+/* Preview mode: the builder's iframe. Looks exactly like the real thing
+   because it is the real thing, with the hands taken off. */
+:root[data-preview="on"] {
+  pointer-events: none;
+  user-select: none;
+}
+
+:root[data-preview="on"] .scene {
+  min-block-size: 0;
+}
+
+/* ==========================================================================
+   Narrow viewports
+   ========================================================================== */
+
+@media (max-width: 720px) {
+  .scene {
+    padding: var(--space-5) var(--space-4) var(--space-7);
+  }
+
+  .shortcuts-circles,
+  .shortcuts-squares {
+    grid-template-columns: repeat(min(var(--per-row, 8), 5), minmax(0, 1fr));
+  }
+
+  .bookmarks-columns {
+    columns: 1;
+  }
+
+  .clock-monumental .clock-time {
+    font-size: var(--text-xl);
+  }
+}
+
+@media (max-width: 400px) {
+  .shortcuts-circles,
+  .shortcuts-squares {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .shortcuts-ring {
+    inline-size: min(300px, 88vw);
+  }
+
+  .clock-dial {
+    inline-size: 148px;
+    block-size: 148px;
+  }
+}
+
+/* ==========================================================================
+   The restore strip, note checkboxes, filtering on type
+   ========================================================================== */
+
+/* ---- Restore your tabs --------------------------------------------------
+   The morning after a crash, and no other morning. A strip rather than a
+   dialog: it is an offer, not a question that has to be answered before the
+   page can be used. */
+
+.restore {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-block-size: 40px;
+  padding-block: var(--space-2);
+  padding-inline: var(--space-4) var(--space-2);
+  border-block-end: var(--hairline) solid var(--border);
+  background-color: var(--bg-raised);
+  color: var(--text-secondary);
+  animation: restore-in var(--dur-slow) var(--ease-enter) both;
+}
+
+@keyframes restore-in {
+  from { opacity: 0; translate: 0 -8px; }
+  to   { opacity: 1; translate: 0 0; }
+}
+
+.restore > svg {
+  flex: none;
+  inline-size: 16px;
+  block-size: 16px;
+  color: var(--text-muted);
+}
+
+.restore-text {
+  flex: 1 1 auto;
+  font-size: var(--text-sm);
+}
+
+.restore-go {
+  flex: none;
+  padding-block: var(--space-1);
+}
+
+.restore-dismiss {
+  flex: none;
+  inline-size: 24px;
+  block-size: 24px;
+}
+
+/* ---- Notes: the reading view and its checkboxes -------------------------
+   A note is read far more often than it is written, so reading is the resting
+   state and the textarea is what it becomes under a caret. Swapping them is
+   what lets a checkbox be a real button rather than two characters you have to
+   aim at with a mouse. */
+
+.note:not(.is-editing) .note-body {
+  display: none;
+}
+
+.note.is-editing .note-view {
+  display: none;
+}
+
+.note-view {
+  min-block-size: 72px;
+  font-size: var(--text-sm);
+  line-height: var(--leading-base);
+  color: var(--text-primary);
+  cursor: text;
+}
+
+.note-line {
+  min-block-size: 1.35em;
+  overflow-wrap: anywhere;
+}
+
+.note-line-empty {
+  color: var(--text-muted);
+}
+
+.note-line-check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.note-check {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 14px;
+  block-size: 14px;
+  margin-block-start: 0.22em;
+  border: var(--hairline) solid var(--text-muted);
+  border-radius: 3px;
+  color: var(--accent-text);
+  background-color: transparent;
+  transition: background-color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+
+.note-check svg {
+  inline-size: 10px;
+  block-size: 10px;
+  opacity: 0;
+}
+
+.note-line-check[data-checked='true'] .note-check {
+  border-color: var(--accent);
+  background-color: var(--accent);
+}
+
+.note-line-check[data-checked='true'] .note-check svg {
+  opacity: 1;
+}
+
+/* Done, and still readable. A struck-through line at muted weight says
+   "handled" without making the list harder to scan. */
+.note-line-check[data-checked='true'] .note-check-text {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  text-decoration-thickness: from-font;
+}
+
+.note-count {
+  position: absolute;
+  inset-block-end: var(--space-1);
+  inset-inline-end: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+/* ---- Shortcuts: filtering on type ---------------------------------------
+   No search field. Focus the grid, start typing, and what does not match
+   recedes rather than disappearing — the layout holds still, so the one you
+   were reaching for does not move out from under you. */
+
+/* The wrapper exists only to give the filter hint somewhere to live next to the
+   grid. `display: contents` means it generates no box at all, so the grid stays
+   the direct layout child of .l-module it has always been — which matters most
+   for the ring, whose centring depends on the whole chain shrink-wrapping to
+   its 440px. A DOM change that is invisible to layout. */
+.shortcuts-wrap {
+  display: contents;
+}
+
+.shortcuts-filter {
+  margin-block-end: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-align: start;
+}
+
+.is-filtered-out {
+  opacity: 0.2;
+  transition: opacity var(--dur-quick) var(--ease-out);
+}
+
+.is-filtering .is-filtered-out {
+  pointer-events: none;
+}
+
+/* ---- First run ----------------------------------------------------------
+   A small panel over a translucent backdrop, so the canvas stays visible
+   behind it and redraws as you choose. The demonstration is the explanation. */
+
+.onboard {
+  inline-size: min(520px, calc(100vw - var(--space-6)));
+  text-align: center;
+}
+
+.onboard-title {
+  margin-block-end: var(--space-5);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.onboard-scenes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+  gap: var(--space-2);
+  margin-block-end: var(--space-5);
+}
+
+.onboard-scene {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-2);
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  color: var(--text-secondary);
+  transition: border-color var(--dur-quick) var(--ease-out),
+              background-color var(--dur-quick) var(--ease-out),
+              color var(--dur-quick) var(--ease-out);
+}
+
+.onboard-scene:hover {
+  border-color: var(--text-muted);
+  color: var(--text-primary);
+}
+
+.onboard-scene[aria-pressed='true'] {
+  border-color: var(--accent);
+  background-color: var(--accent-soft);
+  color: var(--text-primary);
+}
+
+.onboard-scene-ar {
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  line-height: var(--leading-tight);
+}
+
+.onboard-scene-en {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.onboard-go {
+  inline-size: 100%;
+  justify-content: center;
+}

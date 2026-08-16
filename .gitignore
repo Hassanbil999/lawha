@@ -1,0 +1,8 @@
+node_modules/
+*.zip
+.DS_Store
+Thumbs.db
+*.log
+
+# Local editor and tooling config, not part of the extension.
+.claude/
