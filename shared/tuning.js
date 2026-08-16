@@ -44,6 +44,10 @@ import { get, getMany, setData, setPresentation } from './storage.js';
  * @param {object} options
  * @param {(message: string) => void} options.onToast
  */
+/** The stored default, and what an image raises it to on upload. */
+const DEFAULT_SCRIM = 20;
+const IMAGE_SCRIM = 35;
+
 export async function mountTuningPanel(root, { onToast = () => {} } = {}) {
   const prefs = await getMany([
     'palette',
@@ -567,6 +571,20 @@ export async function mountTuningPanel(root, { onToast = () => {} } = {}) {
     await setData('wallpaper', result.dataURL);
     state.prefs.wallpaper = result.dataURL;
 
+    /* A photograph needs more between it and the text than a flat colour does,
+     * whatever the palette is doing. Overall luminance is not the problem — a
+     * picture with a bright window in one corner and shadow in the other will
+     * defeat any single text colour, and the scrim is the only thing that
+     * evens that out. 35% keeps the picture plainly visible and the words
+     * plainly readable, and the slider is right there for anyone who disagrees.
+     *
+     * Only from the untouched default, so a scrim you have already set by hand
+     * is never overwritten by uploading a new image. */
+    if ((state.prefs.bgScrim ?? DEFAULT_SCRIM) === DEFAULT_SCRIM) {
+      state.prefs.bgScrim = IMAGE_SCRIM;
+      await setPresentation('bgScrim', IMAGE_SCRIM);
+    }
+
     // Derive once, on upload, and cache. Re-running k-means on every new tab
     // would be milliseconds wasted on an answer that cannot have changed.
     const derived = await paletteFromImage(result.dataURL);
@@ -586,15 +604,6 @@ export async function mountTuningPanel(root, { onToast = () => {} } = {}) {
     if (state.prefs.extractPalette && derived) {
       state.prefs.palette = derived;
       await setPresentation('palette', derived);
-
-      // An interface that already shares the photograph's colour DNA needs far
-      // less separating it from the photograph. Halving the scrim is the visible
-      // argument for deriving the palette at all — but only from the untouched
-      // default, and as a real stored value the slider can put back.
-      if ((state.prefs.bgScrim ?? 20) === 20) {
-        state.prefs.bgScrim = 10;
-        await setPresentation('bgScrim', 10);
-      }
     } else if (state.prefs.palette && typeof state.prefs.palette === 'object') {
       // Only clear an override we put there ourselves.
       state.prefs.palette = null;

@@ -6,11 +6,13 @@
 /* Lawha — Istikhrāj (استخراج, "extraction").
  *
  * The image does not sit behind the interface. The interface is grown from the
- * image: every token comes out of the photograph's own colour distribution, so
- * cards, rules and text already harmonise with what is behind them. That is
- * what separates this from "photo, with UI on top" — the scrim can then be
- * almost nothing (8–12%) instead of the 20% wash a mismatched UI needs to stay
- * legible.
+ * image: every surface, rule and accent comes out of the photograph's own
+ * colour distribution, so the whole thing harmonises with what is behind it.
+ * That is what separates this from "photo, with UI on top".
+ *
+ * Text is the exception, and it is deliberate. Harmony is the wrong goal for
+ * something you have to read off a photograph — a colour drawn from the picture
+ * is by definition close to the picture. See the note above the text tokens.
  *
  * Everything runs locally on a 100×100 canvas in a couple of milliseconds. No
  * service, no upload, no network. */
@@ -27,6 +29,9 @@ import {
 } from './utils.js';
 
 const SAMPLE = 100;
+
+/** Not pure black: #000 against a photograph reads as a hole punched in it. */
+const INK = '#0A0A0A';
 
 function toHex([r, g, b]) {
   const channel = (v) => Math.round(v).toString(16).padStart(2, '0');
@@ -90,13 +95,40 @@ export async function paletteFromImage(imageUrl) {
   const raised = isDark ? dark : light;
   const card = isDark ? dark : '#FFFFFF';
 
+  /* Text over a wallpaper does not sit on --bg-canvas. It sits on the
+   * photograph, and harmonizePalette — which measures text against the canvas
+   * and the card — is therefore checking it against a surface that is nowhere
+   * on screen. A palette can pass that check and still put grey-on-grey over
+   * the picture, which is exactly how a clock becomes unreadable.
+   *
+   * So the text tokens stop being drawn from the image and become the only two
+   * colours that are safe against all of it: white or near-black, whichever
+   * stands further off the photograph's own midtone. Everything else — canvas,
+   * card, accent, border — still comes out of the picture, so the interface
+   * keeps its colour DNA and only the reading surface is made absolute. */
+  // Driven by the same isDark that chose the canvas and the card, not by an
+  // independent contrast comparison against the midtone. Those two can disagree
+  // on an image whose midtone sits near the threshold, and the disagreement is
+  // ugly in a specific way: white text picked for the photograph, over a canvas
+  // picked light for the same photograph, is invisible on every card.
+  //
+  // One decision, three surfaces. For a genuinely dark or genuinely light image
+  // this lands on the same answer either method would give; for a midtone one,
+  // neither white nor black clears 7:1 against the picture and no choice here
+  // could — that is what the scrim is for.
+  const textPrimary = isDark ? '#FFFFFF' : INK;
+
+  /* Secondary and muted are that same colour, stepped back toward the canvas.
+   * Written as opaque hex rather than rgba(): isSafeColor admits #RGB, #RRGGBB
+   * and an "r g b" triple and nothing else, so an alpha colour here would be
+   * refused the moment this palette was exported and imported again. */
   return {
     'bg-canvas': canvasColor,
     'bg-raised': raised,
     'bg-card': card,
-    'text-primary': isDark ? lightest : darkest,
-    'text-secondary': isDark ? light : dark,
-    'text-muted': mid,
+    'text-primary': textPrimary,
+    'text-secondary': blend(textPrimary, canvasColor, 0.72),
+    'text-muted': blend(textPrimary, canvasColor, 0.45),
     accent,
     'accent-soft': blend(accent, canvasColor, 0.15),
     'accent-text': contrastRatio(accent, '#FFFFFF') >= 4.5 ? '#FFFFFF' : darkest,
