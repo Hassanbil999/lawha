@@ -141,6 +141,7 @@ export const STRINGS = {
     onboard_go: "Open my canvas",
 
     focus_indicator: "Focus",
+    empty_illustration: "Nothing here yet",
 
 
     /* -- The cheatsheet, shortcut filtering, session restore, the scrim
@@ -281,6 +282,7 @@ export const STRINGS = {
     onboard_go: "افتح لوحتي",
 
     focus_indicator: "تركيز",
+    empty_illustration: "لا شيء هنا بعد",
 
 
     help_title: "اختصارات لوحة المفاتيح",

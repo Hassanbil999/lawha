@@ -150,6 +150,55 @@ if (!en || !ar) {
 
   if (problems.length) fail('STRINGS.en and STRINGS.ar hold the same keys', problems);
   else ok(`STRINGS.en and STRINGS.ar hold the same ${enKeys.size} keys`);
+
+  /* An empty value is worse than a missing key. assertStringsComplete() treats
+   * "" as absent and throws on it at boot, which surfaces as the Errors button
+   * on chrome://extensions and nowhere else — a placeholder someone meant to
+   * fill in later takes the whole extension down on load. */
+  const blanks = [];
+  for (const [lang, block] of [['en', en], ['ar', ar]]) {
+    for (const key of keysOf(block)) {
+      const value = new RegExp(`\\b${key}\\s*:\\s*(["'\`])(.*?)\\1`, 's').exec(block);
+      if (value && value[2].trim() === '') blanks.push(`STRINGS.${lang}.${key} is empty`);
+    }
+  }
+
+  if (blanks.length) fail('No string is defined but left empty', blanks);
+  else ok('No string is defined but left empty');
+}
+
+/* ---- data-i18n attributes -----------------------------------------------
+ * The other half of the same risk. check-locales already proves every t('key')
+ * in JavaScript resolves; markup asks for strings too, through data-i18n, and
+ * applyStrings() calls t() on whatever it finds there. A typo in an attribute
+ * throws at boot on a dev build exactly like a missing key in code does. */
+
+if (en) {
+  const enKeys = keysOf(en);
+  const problems = [];
+  let checked = 0;
+
+  for (const dir of ['newtab', 'sidebar', 'popup', 'gallery', 'tools']) {
+    const at = join(ROOT, dir);
+    if (!existsSync(at)) continue;
+
+    for (const name of readdirSync(at)) {
+      if (!name.endsWith('.html')) continue;
+      const markup = readFileSync(join(at, name), 'utf8');
+
+      for (const match of markup.matchAll(
+        /data-i18n(?:-placeholder|-aria|-title)?="([A-Za-z0-9_]+)"/g
+      )) {
+        checked += 1;
+        if (!enKeys.has(match[1])) {
+          problems.push(`${dir}/${name}: data-i18n="${match[1]}" has no entry`);
+        }
+      }
+    }
+  }
+
+  if (problems.length) fail('Every data-i18n attribute resolves to a string', problems);
+  else ok(`Every data-i18n attribute resolves to a string (${checked} checked)`);
 }
 
 /* Every t('key') the codebase asks for must exist. A key that is only ever
