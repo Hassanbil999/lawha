@@ -32,6 +32,17 @@ week, and then you cannot unsee where you are in your day.
 3. Enable Developer mode
 4. Load unpacked → select the `Lawha/` folder
 
+### The strip along the bottom
+
+Chrome draws its own footer over any new tab an extension provides — the
+extension's name and a "Customize Chrome" button. It is browser chrome, painted
+outside the page, so no extension can remove it: that is the point of it, since
+it is how you find out which extension took over your new tab.
+
+To hide it, open `chrome://flags/#ntp-footer`, set it to **Disabled**, and
+relaunch Chrome. Lawha already strips the older form of this footer, which
+earlier Chrome versions injected into the page itself.
+
 ## Scenes
 
 A Scene is a JSON file describing a complete arrangement: the colour palette,
