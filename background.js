@@ -320,7 +320,17 @@ async function fetchFeedText(url) {
       signal: controller.signal,
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return await response.text();
+
+    const text = await response.text();
+    // A response that is not even trying to be XML — an HTML error page, a
+    // login wall, a redirect target — produces the same "nothing to show"
+    // result as a genuine parse failure either way. Catching it here means
+    // the offscreen document never hands it to DOMParser, which is what
+    // avoids Chrome's own malformed-XML error rendering: that rendering uses
+    // inline styles, which trips this extension's CSP and logs a console
+    // warning that looks like a crash but is not one.
+    if (!/^\s*(<\?xml|<)/i.test(text)) throw new Error('not_xml');
+    return text;
   } finally {
     clearTimeout(timeout);
   }
