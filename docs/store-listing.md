@@ -43,8 +43,14 @@ WHAT IT DOES
 ARABIC SUPPORT
 Lawha is written for Arabic speakers, not translated for them. Full RTL layout, native Arabic fonts, real Arabic phrasing throughout.
 
+FEEDS (متابعات)
+Add RSS or Atom feed URLs and see unread counts and headlines, right on your new tab. No algorithm, no recommendations — just the feeds you chose. Off by default.
+
 PRIVACY
-Zero network requests. No accounts. No analytics. No tracking. Everything lives in your browser. You can verify this in Chrome DevTools → Network tab — it will be empty.
+No accounts. No analytics. No tracking. No server of any kind. Everything lives in your browser. The one network request Lawha ever makes is fetching a feed URL you explicitly added in Feeds — verify it yourself in Chrome DevTools → Network tab, which stays empty until you turn Feeds on.
+
+HOST PERMISSIONS
+Lawha requests access to all URLs solely so the Feeds feature can fetch feed addresses you manually add. It has no content scripts and cannot read or modify any website you visit.
 
 COMPLETELY FREE
 No paid features, no subscription, no freemium wall. The scene-sharing system is a file you export and send to whoever you want.
@@ -104,7 +110,7 @@ decoration. No gradients, no screenshots, no feature bullets.
 |---|---|
 | Does your extension use remote code? | **No** |
 | Does your extension handle user data? | **Yes** |
-| — what kind | Browsing history (read at render, never stored or transmitted); website content? **No**; personal communications? **No**; location? **No**; financial? **No**; authentication? **No** |
+| — what kind | Browsing history (read at render, never stored or transmitted); website content — RSS/Atom feed XML fetched only from URLs the user manually enters in Feeds, stored locally, never transmitted to Lawha; personal communications? **No**; location? **No**; financial? **No**; authentication? **No** |
 | Is data sold to third parties? | **No** |
 | Is data used or transferred for purposes unrelated to core functionality? | **No** |
 | Is data used to determine creditworthiness? | **No** |
@@ -119,9 +125,12 @@ different address appear publicly, since the store listing makes it reachable.
 `tools/pre-submission.sh` fails if the placeholder text ever comes back.
 
 The reviewer cross-checks the policy against the manifest's permission list.
-Both currently name the same six: `tabs`, `bookmarks`, `history`, `storage`,
-`favicon`, `sidePanel`. If a permission is ever added, the policy has to gain a
-paragraph in the same commit.
+Both currently name the same nine: `tabs`, `bookmarks`, `history`, `storage`,
+`favicon`, `sidePanel`, `alarms`, `offscreen`, and `host_permissions:
+["<all_urls>"]`. If a permission is ever added, the policy has to gain a
+paragraph in the same commit — `tools/validate-manifest.mjs` and
+`tools/audit.mjs` both pin the exact expected set, so an undeclared addition
+fails `pre-submission.sh` rather than reaching a reviewer first.
 
 ---
 

@@ -90,13 +90,16 @@
 }
 
 /* Untouched for more than a day. A dot, not a badge — it is a note to
-   yourself, not a warning. */
+   yourself, not a warning. --text-muted sat too close to --bg-raised on a row
+   background to notice; --accent at quarter strength stays visible without
+   reading as an alert. */
 .tab-stale {
   flex: none;
   inline-size: 4px;
   block-size: 4px;
   border-radius: var(--radius-pill);
-  background-color: var(--text-muted);
+  background-color: var(--accent);
+  opacity: 0.4;
 }
 
 .tabs-empty {

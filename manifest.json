@@ -1,11 +1,12 @@
 {
   "manifest_version": 3,
   "name": "__MSG_appName__",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "__MSG_appDesc__",
   "default_locale": "en",
 
-  "permissions": ["tabs", "bookmarks", "history", "storage", "favicon", "sidePanel"],
+  "permissions": ["tabs", "bookmarks", "history", "storage", "favicon", "sidePanel", "alarms", "offscreen"],
+  "host_permissions": ["<all_urls>"],
 
   "chrome_url_overrides": { "newtab": "newtab/newtab.html" },
   "side_panel": { "default_path": "sidebar/sidebar.html" },
@@ -42,6 +43,6 @@
   },
 
   "content_security_policy": {
-    "extension_pages": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' chrome-extension: data:; font-src 'self'; frame-src 'self'; connect-src 'self'; object-src 'self'"
+    "extension_pages": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' chrome-extension: data:; font-src 'self'; frame-src 'self'; connect-src *; object-src 'self'"
   }
 }

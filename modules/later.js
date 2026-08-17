@@ -19,7 +19,10 @@ import {
   relativeTime,
   contextMenu,
   copyButton,
+  removeButton,
   isSafeURL,
+  urlDedupeKey,
+  emptyState,
 } from '../shared/utils.js';
 import { get, updateData, capped, LIMITS } from '../shared/storage.js';
 
@@ -39,7 +42,7 @@ export async function render(cfg, ctx) {
   }
 
   if (!ordered.length) {
-    return ctx.section('sec_later', el('p', { class: 'l-empty', text: ctx.t('later_empty') }), {
+    return ctx.section('sec_later', emptyState(ctx.t('later_empty'), 'Ctrl+Shift+S'), {
       module: id,
     });
   }
@@ -54,7 +57,7 @@ export async function render(cfg, ctx) {
  *  almost always the one you meant to get back to. */
 function buildCount(items, ctx) {
   if (!items.length) {
-    return el('p', { class: 'l-empty', text: ctx.t('later_empty') });
+    return emptyState(ctx.t('later_empty'), 'Ctrl+Shift+S');
   }
 
   const oldest = items[items.length - 1];
@@ -78,7 +81,7 @@ function asList(items, ctx) {
   for (const item of items) {
     const row = el(
       'a',
-      { class: 'l-row l-row-copyable', href: item.url, title: item.title || item.url },
+      { class: 'l-row l-row-actionable', href: item.url, title: item.title || item.url },
       [
         faviconImage(item.url, 16),
         el('span', { class: 'l-row-title', text: item.title || domainOf(item.url) }),
@@ -86,7 +89,11 @@ function asList(items, ctx) {
       ]
     );
     wireRemove(row, item, ctx);
-    list.append(el('li', { class: 'l-row-host' }, [row, copyButton(item.url, ctx.t, ctx.icon)]));
+    const actions = el('div', { class: 'l-row-actions' }, [
+      copyButton(item.url, ctx.t, ctx.icon),
+      removeButton(() => removeLater(item.url, ctx), ctx.t, ctx.icon),
+    ]);
+    list.append(el('li', { class: 'l-row-host' }, [row, actions]));
   }
 
   return list;
@@ -112,7 +119,11 @@ function asTiles(items, ctx) {
       ]
     );
     wireRemove(tile, item, ctx);
-    grid.append(el('div', { class: 'l-tile-host' }, [tile, copyButton(item.url, ctx.t, ctx.icon)]));
+    const actions = el('div', { class: 'l-row-actions' }, [
+      copyButton(item.url, ctx.t, ctx.icon),
+      removeButton(() => removeLater(item.url, ctx), ctx.t, ctx.icon),
+    ]);
+    grid.append(el('div', { class: 'l-tile-host' }, [tile, actions]));
   }
 
   return grid;
@@ -144,7 +155,7 @@ export async function saveForLater({ url, title }) {
   if (!isSafeURL(url)) throw new Error(`Lawha blocked an unsafe URL: ${url}`);
 
   await updateData('later', (current) => {
-    if (current.some((entry) => entry.url === url)) return current;
+    if (current.some((entry) => urlDedupeKey(entry.url) === urlDedupeKey(url))) return current;
     return [
       ...current,
       { url, title: capped(title || url, LIMITS.laterTitle), saved: Date.now() },

@@ -30,6 +30,7 @@ export const DATA_KEYS = [
   'shortcuts',
   'notes',
   'later',
+  'feeds',
   'tabLastAccessed',
   'wallpaper',
   'lastSession',
@@ -86,6 +87,8 @@ export const LIMITS = {
   // A reading queue past fifty is not a queue, it is a graveyard. The newest
   // are kept: the thing you saved this morning is the thing you meant.
   laterItems: 50,
+  feedTitle: 60,
+  feedItemTitle: 120,
 };
 
 /** Trim a user-supplied string to its cap. */
@@ -116,6 +119,7 @@ const AREA = {
   shortcuts: 'local',
   notes: 'local',
   later: 'local',
+  feeds: 'local',
   customScenes: 'local',
   gradient: 'local',
   wallpaper: 'local',
@@ -137,14 +141,15 @@ export const DEFAULTS = {
   // because an image the UI does not match is the worse of the two defaults.
   extractPalette: true,
   imageExtractedPalette: null,
-  // 20% of --bg-canvas over a photograph: enough to read against, little
-  // enough that the picture is still the picture.
-  bgScrim: 20,
+  // 30% of --bg-canvas over a photograph: the earlier 20% left a bright photo
+  // legible but a genuinely busy one still fought the text on top of it.
+  bgScrim: 30,
   badgeCount: false,
 
   shortcuts: [],
   notes: [],
   later: [],
+  feeds: [],
   customScenes: [],
   gradient: { colors: ['#FBFAF7', '#D6E8E4'], angle: 135 },
   wallpaper: null,

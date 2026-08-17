@@ -41,6 +41,9 @@ export const ICON_PATHS = {
   // The letter lam, at sprite scale. The standalone assets/icons/logo.svg
   // carries the present-moment dot as well; here the upright reads on its own.
   logo: 'M10.5 3.5v6a3 3 0 0 1-3 3 3 3 0 0 1-3-3',
+  // A feed that failed to fetch. A circle rather than a triangle — this is a
+  // note about one row, not a page-level warning.
+  alert: 'M8 2.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM8 5.25v3.5M8 11.25h.01',
 };
 
 const SVG_NS = 'http://www.w3.org/2000/svg';

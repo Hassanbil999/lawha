@@ -32,8 +32,8 @@ export const STRINGS = {
     cmd_placeholder: "Search tabs, bookmarks, history",
     cmd_empty: "Nothing matches. Try fewer words.",
     tabs_empty: "No tabs open. Open one to get started.",
-    notes_empty: "Add a note to keep something in view.",
-    later_empty: "Save a page here to come back to it.",
+    notes_empty: "Click + to write a note",
+    later_empty: "Press Ctrl+Shift+S on any page to save it",
 
     action_new_tab: "New tab", action_close: "Close", action_pin: "Pin",
     action_save: "Save for later", action_add: "Add", action_delete: "Delete",
@@ -59,9 +59,9 @@ export const STRINGS = {
     cmd_src_tab: "tab", cmd_src_bookmark: "bookmark", cmd_src_history: "history",
     cmd_hint_nav: "navigate", cmd_hint_open: "open", cmd_hint_close: "close",
 
-    shortcuts_empty: "Add a link to reach it in one click.",
-    recent_empty: "Pages you visit will collect here.",
-    bookmarks_empty: "Bookmarks you save will show up here.",
+    shortcuts_empty: "Click + to add your first shortcut",
+    recent_empty: "Pages you visit will appear here",
+    bookmarks_empty: "Your Chrome bookmark folders appear here",
 
     tabs_filter: "Filter tabs",
     tabs_count_one: "1 tab", tabs_count_many: "$1 tabs",
@@ -139,6 +139,18 @@ export const STRINGS = {
 
     onboard_welcome: "Pick a place to start.",
     onboard_go: "Open my canvas",
+    onboard_next: "Next",
+    onboard_skip: "Skip",
+    onboard_back: "Back",
+    onboard_step_of: "Step $1 of $2",
+    onboard_tour1_title: "Your shortcuts",
+    onboard_tour1_body: "Click + to add any website. Drag to reorder.",
+    onboard_tour2_title: "Save for later",
+    onboard_tour2_body: "Press Ctrl+Shift+S on any page to save it here.",
+    onboard_tour3_title: "Search everything",
+    onboard_tour3_body: "Press Ctrl+Shift+P to search tabs, bookmarks, and history at once.",
+    onboard_tour4_title: "Your sidebar",
+    onboard_tour4_body: "Click the Lawha icon in the toolbar to open your tab sidebar.",
 
     focus_indicator: "Focus",
     empty_illustration: "Nothing here yet",
@@ -166,6 +178,20 @@ export const STRINGS = {
 
     bg_scrim: "Background opacity",
     set_badge: "Tab count on the icon",
+
+    /* -- Feeds -- */
+    sec_feeds: "Feeds",
+    feeds_add: "Add feed",
+    feeds_url_label: "Feed URL",
+    feeds_empty: "Click + to follow a blog, newsletter, or YouTube channel",
+    feeds_add_error: "Could not read that feed. Check the URL and try again.",
+    feeds_error_icon: "Feed error",
+    feeds_mark_read: "Mark all read",
+    feeds_unread_one: "1 unread",
+    feeds_unread_many: "$1 unread",
+    feeds_hint_url: "Works with blogs, newsletters, YouTube channels, and news sites that publish RSS or Atom feeds.",
+    feeds_max: "You have reached the 12-feed limit.",
+    feeds_fetching: "Checking feed…",
   },
 
   ar: {
@@ -179,8 +205,8 @@ export const STRINGS = {
     cmd_placeholder: "ابحث في التبويبات والعلامات والسجل",
     cmd_empty: "لا نتائج. جرّب كلماتٍ أقل.",
     tabs_empty: "لا توجد تبويبات مفتوحة.",
-    notes_empty: "أضف ملاحظةً لتبقى أمامك.",
-    later_empty: "احفظ صفحةً لتعود إليها لاحقًا.",
+    notes_empty: "اضغط + لكتابة ملاحظة",
+    later_empty: "اضغط Ctrl+Shift+S في أي صفحة لحفظها",
 
     action_new_tab: "تبويب جديد", action_close: "إغلاق", action_pin: "تثبيت",
     action_save: "احفظ لاحقًا", action_add: "إضافة", action_delete: "حذف",
@@ -202,9 +228,9 @@ export const STRINGS = {
     cmd_src_tab: "تبويب", cmd_src_bookmark: "علامة", cmd_src_history: "سجل",
     cmd_hint_nav: "للتنقل", cmd_hint_open: "للفتح", cmd_hint_close: "للإغلاق",
 
-    shortcuts_empty: "أضف رابطًا لتصل إليه بنقرة.",
-    recent_empty: "ستتجمّع هنا الصفحات التي تزورها.",
-    bookmarks_empty: "ستظهر هنا العلامات التي تحفظها.",
+    shortcuts_empty: "اضغط + لإضافة أول اختصار",
+    recent_empty: "الصفحات التي تزورها ستظهر هنا",
+    bookmarks_empty: "مجلدات الإشارات المرجعية تظهر هنا",
 
     tabs_filter: "صفِّ التبويبات",
     tabs_count_one: "تبويب واحد", tabs_count_many: "$1 تبويبات",
@@ -280,6 +306,18 @@ export const STRINGS = {
 
     onboard_welcome: "اختر نقطة البداية.",
     onboard_go: "افتح لوحتي",
+    onboard_next: "التالي",
+    onboard_skip: "تخطي",
+    onboard_back: "السابق",
+    onboard_step_of: "الخطوة $1 من $2",
+    onboard_tour1_title: "اختصاراتك",
+    onboard_tour1_body: "اضغط + لإضافة أي موقع. اسحب لإعادة الترتيب.",
+    onboard_tour2_title: "احفظ لاحقًا",
+    onboard_tour2_body: "اضغط Ctrl+Shift+S في أي صفحة لحفظها هنا.",
+    onboard_tour3_title: "ابحث في كل شيء",
+    onboard_tour3_body: "اضغط Ctrl+Shift+P للبحث في التبويبات والإشارات والسجل دفعةً واحدة.",
+    onboard_tour4_title: "شريطك الجانبي",
+    onboard_tour4_body: "اضغط أيقونة لوحة في شريط الأدوات لفتح الشريط الجانبي.",
 
     focus_indicator: "تركيز",
     empty_illustration: "لا شيء هنا بعد",
@@ -304,6 +342,20 @@ export const STRINGS = {
 
     bg_scrim: "شفافية الخلفية",
     set_badge: "عدد التبويبات على الأيقونة",
+
+    /* -- متابعات -- */
+    sec_feeds: "متابعات",
+    feeds_add: "إضافة متابعة",
+    feeds_url_label: "رابط الخلاصة",
+    feeds_empty: "اضغط + لمتابعة مدونة أو نشرة أو قناة يوتيوب",
+    feeds_add_error: "تعذّر قراءة هذه الخلاصة. تحقق من الرابط وحاول مجددًا.",
+    feeds_error_icon: "خطأ في الخلاصة",
+    feeds_mark_read: "تعيين الكل كمقروء",
+    feeds_unread_one: "غير مقروء",
+    feeds_unread_many: "$1 غير مقروء",
+    feeds_hint_url: "يعمل مع المدونات والنشرات البريدية وقنوات يوتيوب والمواقع الإخبارية التي تنشر خلاصات RSS أو Atom.",
+    feeds_max: "وصلت إلى الحد الأقصى وهو ١٢ خلاصة.",
+    feeds_fetching: "جارٍ التحقق…",
   },
 };
 
@@ -312,11 +364,12 @@ export const MODULE_LABELS = {
   en: {
     clock: "Clock", waqt: "Time arc", shortcuts: "Shortcuts", recent: "Recent",
     bookmarks: "Bookmarks", notes: "Notes", later: "Later", search: "Search",
+    feeds: "Feeds",
   },
   ar: {
     clock: "الساعة", waqt: "قوس الوقت", shortcuts: "الوصول السريع",
     recent: "الأخيرة", bookmarks: "العلامات", notes: "الملاحظات",
-    later: "لاحقًا", search: "البحث",
+    later: "لاحقًا", search: "البحث", feeds: "متابعات",
   },
 };
 
@@ -331,6 +384,7 @@ export const VARIANT_LABELS = {
     notes: { cards: "Cards", strip: "Strip", stack: "Stack", off: "Off" },
     later: { count: "Count", list: "List", tiles: "Tiles", off: "Off" },
     search: { bar: "Bar", icon: "Icon", off: "Off" },
+    feeds: { list: "List", compact: "Compact", off: "Off" },
   },
   ar: {
     clock: { minimal: "بسيطة", monumental: "ضخمة", ring: "دائرة", off: "مخفية" },
@@ -341,6 +395,7 @@ export const VARIANT_LABELS = {
     notes: { cards: "بطاقات", strip: "شريط", stack: "كومة", off: "مخفية" },
     later: { count: "عدد", list: "قائمة", tiles: "بلاطات", off: "مخفي" },
     search: { bar: "شريط", icon: "أيقونة", off: "مخفي" },
+    feeds: { list: "قائمة", compact: "مضغوطة", off: "مخفية" },
   },
 };
 

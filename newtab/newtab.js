@@ -55,8 +55,9 @@ import * as bookmarks from '../modules/bookmarks.js';
 import * as notes from '../modules/notes.js';
 import * as later from '../modules/later.js';
 import * as search from '../modules/search.js';
+import * as feeds from '../modules/feeds.js';
 
-const RENDERERS = { clock, waqt, shortcuts, recent, bookmarks, notes, later, search };
+const RENDERERS = { clock, waqt, shortcuts, recent, bookmarks, notes, later, search, feeds };
 
 const sceneRoot = document.getElementById('scene');
 const announcer = document.getElementById('announcer');
@@ -302,6 +303,7 @@ async function boot() {
 
   await Promise.all([paintBackground(), applyFocusMode()]);
   await draw();
+  mountHelpButton();
 
   bindPaletteShortcut(document);
 
@@ -327,6 +329,24 @@ async function boot() {
   } else {
     runOnboarding().catch((error) => console.error('Lawha: onboarding failed', error));
   }
+}
+
+/**
+ * A persistent way to find the keyboard cheatsheet, for the person who never
+ * learns `?` opens it because nothing on the page hints that it does. Never
+ * part of a module or region — appended straight to body, after everything
+ * else has rendered, so it survives a Scene switch and a module refresh
+ * alike without any of them knowing it exists.
+ */
+function mountHelpButton() {
+  const button = el('button', {
+    class: 'help-fab',
+    type: 'button',
+    'aria-label': t('help_title'),
+    on: { click: () => toggleShortcutOverlay(t) },
+  }, ['?']);
+  document.body.append(button);
+  onLanguageChange(() => button.setAttribute('aria-label', t('help_title')));
 }
 
 /**
@@ -368,17 +388,21 @@ async function wirePaletteRequests() {
 }
 
 /* ---- First run ----------------------------------------------------------
- * One question, asked once: where would you like to start?
+ * Two questions, asked once: where would you like to start, and — since this
+ * is the one moment a person is guaranteed to be looking at the dialog rather
+ * than the canvas — four cards on the parts of Lawha that live behind a
+ * keystroke and would otherwise go undiscovered.
  *
- * The panel is small and its backdrop is translucent, so the page is visible
- * behind it — and choosing a name redraws that page underneath while you watch.
- * That is the entire explanation of what a Scene is, given by demonstration
- * rather than by a paragraph nobody reads. It is also the reason this is not a
- * tour: there is nothing to tour, and the product's whole argument is that the
- * canvas should be in front of you rather than described to you.
+ * The scene step keeps its original argument: the panel's backdrop is
+ * translucent, the page is visible behind it, and choosing a name redraws
+ * that page underneath while you watch. The tour step is different in kind —
+ * it describes rather than demonstrates — which is why it is four short cards
+ * and not a guided walk across the page: the canvas is still the point, this
+ * is just the one place a caption is allowed.
  *
- * Nothing is written until you choose. Dismissing without picking leaves you on
- * Diwan, which is where you would have been anyway. */
+ * Nothing is written until the dialog closes, by any route — finishing the
+ * tour, skipping it, Escape, the backdrop. Dismissing before picking a Scene
+ * leaves you on Diwan, which is where you would have been anyway. */
 
 async function runOnboarding() {
   if (await get('onboardingComplete')) return;
@@ -421,19 +445,103 @@ async function runOnboarding() {
     return card;
   });
 
-  const dialog = el('dialog', { class: 'l-dialog onboard', 'aria-label': t('onboard_welcome') }, [
+  const sceneStep = el('div', { class: 'onboard-step' }, [
     el('h2', { class: 'onboard-title', text: t('onboard_welcome') }),
     el('div', { class: 'onboard-scenes' }, cards),
     el('button', {
       class: 'l-btn l-btn-primary onboard-go',
       type: 'button',
-      text: t('onboard_go'),
-      on: { click: finish },
+      text: t('onboard_next'),
+      on: { click: () => showTour() },
     }),
   ]);
 
-  // Closing by any route — the button, Escape, the backdrop — counts as done.
-  // Being asked this twice would be worse than never being asked at all.
+  /* ---- The tour: four cards, back/next and dots, a skip that means exactly
+     what finishing does. Built once; TOUR is the only place its content
+     lives, so the four cards stay four cards even if a translation runs
+     long. */
+
+  const TOUR = [
+    { titleKey: 'onboard_tour1_title', bodyKey: 'onboard_tour1_body' },
+    { titleKey: 'onboard_tour2_title', bodyKey: 'onboard_tour2_body' },
+    { titleKey: 'onboard_tour3_title', bodyKey: 'onboard_tour3_body' },
+    { titleKey: 'onboard_tour4_title', bodyKey: 'onboard_tour4_body' },
+  ];
+
+  let tourIndex = 0;
+
+  const tourCard = el('div', { class: 'onboard-tour-card' });
+
+  const dots = TOUR.map((_, index) =>
+    el('button', {
+      class: 'onboard-dot',
+      type: 'button',
+      'aria-label': t('onboard_step_of', index + 1, TOUR.length),
+      on: { click: () => paintTour(index) },
+    })
+  );
+
+  const backButton = el(
+    'button',
+    {
+      class: 'l-icon-btn onboard-tour-back',
+      type: 'button',
+      'aria-label': t('onboard_back'),
+      on: { click: () => paintTour(tourIndex - 1) },
+    },
+    [icon('arrow_start')]
+  );
+
+  const nextButton = el('button', {
+    class: 'l-btn l-btn-primary onboard-go',
+    type: 'button',
+    on: { click: () => (tourIndex === TOUR.length - 1 ? finish() : paintTour(tourIndex + 1)) },
+  });
+
+  const skipButton = el('button', {
+    class: 'onboard-skip',
+    type: 'button',
+    text: t('onboard_skip'),
+    on: { click: finish },
+  });
+
+  function paintTour(index) {
+    tourIndex = Math.max(0, Math.min(TOUR.length - 1, index));
+
+    replaceChildren(tourCard, [
+      el('h3', { class: 'onboard-tour-title', text: t(TOUR[tourIndex].titleKey) }),
+      el('p', { class: 'onboard-tour-body', text: t(TOUR[tourIndex].bodyKey) }),
+    ]);
+
+    dots.forEach((dot, index2) => {
+      dot.classList.toggle('is-active', index2 === tourIndex);
+      dot.setAttribute('aria-current', String(index2 === tourIndex));
+    });
+
+    backButton.disabled = tourIndex === 0;
+    nextButton.textContent = tourIndex === TOUR.length - 1 ? t('onboard_go') : t('onboard_next');
+  }
+
+  const tourStep = el('div', { class: 'onboard-step', hidden: true }, [
+    skipButton,
+    tourCard,
+    el('div', { class: 'onboard-tour-nav' }, [backButton, el('div', { class: 'onboard-dots' }, dots), nextButton]),
+  ]);
+
+  function showTour() {
+    sceneStep.hidden = true;
+    tourStep.hidden = false;
+    paintTour(0);
+  }
+
+  const dialog = el('dialog', { class: 'l-dialog onboard', 'aria-label': t('onboard_welcome') }, [
+    sceneStep,
+    tourStep,
+  ]);
+
+  // Closing by any route — finishing the tour, skipping it, Escape, the
+  // backdrop — counts as done. Being asked this twice would be worse than
+  // never being asked at all.
   dialog.addEventListener('close', () => {
     dialog.remove();
     setPresentation('onboardingComplete', true).catch((error) =>
@@ -592,6 +700,7 @@ const MODULE_FOR_DATA = {
   shortcuts: 'shortcuts',
   notes: 'notes',
   later: 'later',
+  feeds: 'feeds',
 };
 
 function wireShortcutKeys() {

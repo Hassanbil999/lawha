@@ -18,6 +18,7 @@ import {
   dedupeBy,
   relativeTime,
   copyButton,
+  emptyState,
 } from '../shared/utils.js';
 
 export const id = 'recent';
@@ -41,9 +42,7 @@ export async function render(cfg, ctx) {
   const items = await load(cfg);
 
   if (!items.length) {
-    return ctx.section('sec_recent', el('p', { class: 'l-empty', text: ctx.t('recent_empty') }), {
-      module: id,
-    });
+    return ctx.section('sec_recent', emptyState(ctx.t('recent_empty')), { module: id });
   }
 
   const renderers = { list: asRows, compact: asRows, tiles: asTiles, feed: asFeed };

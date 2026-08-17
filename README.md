@@ -50,17 +50,25 @@ declines a shortcut another extension already claimed.
 
 ## Privacy
 
-Lawha makes no network requests at all. There is no server, no account, no
+Lawha makes no network requests of its own. There is no server, no account, no
 analytics and no telemetry — fonts are bundled, icons are drawn from path data,
 and colours are computed on your machine.
 
-Everything you create stays in your browser's own storage, and the extension
-asks for no host permissions, so it cannot read the content of any page you
-visit.
+The one exception is Feeds (متابعات), an opt-in module that fetches the RSS or
+Atom URLs you add — directly from your browser to that feed's own server,
+never through a Lawha server, because there isn't one. It is off by default.
+Chrome only lets an extension's background service worker fetch a URL past
+that site's own CORS rules with a host permission in the manifest, which is
+why Lawha requests one; it grants no ability to read or modify any page you
+visit, since Lawha has no content scripts.
+
+Everything you create — notes, shortcuts, reading queue, feed subscriptions —
+stays in your browser's own local storage.
 
 You can check all of this yourself: open a new tab, open DevTools → Network, and
-reload. Every request will be a local `chrome-extension://` one, and filtering by
-domain will leave the list empty.
+reload. With Feeds off, every request will be a local `chrome-extension://` one.
+Turn Feeds on and add a feed, and you will see exactly that request and nothing
+else — no telemetry, no request to anywhere you did not ask for.
 
 ## Development
 

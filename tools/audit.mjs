@@ -614,9 +614,14 @@ section('Packaging');
   const problems = [];
 
   if (manifest.manifest_version !== 3) problems.push('not Manifest V3');
-  if (manifest.host_permissions) problems.push('declares host_permissions');
+  // Patch D: host_permissions is deliberate — Feeds fetches a URL someone
+  // adds — but it must stay exactly this one grant, not grow silently.
+  const hostPerms = manifest.host_permissions ?? [];
+  if (hostPerms.length !== 1 || hostPerms[0] !== '<all_urls>') {
+    problems.push(`host_permissions should be exactly ['<all_urls>'], found ${JSON.stringify(hostPerms)}`);
+  }
 
-  const expected = ['tabs', 'bookmarks', 'history', 'storage', 'favicon', 'sidePanel'];
+  const expected = ['tabs', 'bookmarks', 'history', 'storage', 'favicon', 'sidePanel', 'alarms', 'offscreen'];
   const extra = manifest.permissions.filter((p) => !expected.includes(p));
   if (extra.length) problems.push(`unexpected permissions: ${extra.join(', ')}`);
 
@@ -642,7 +647,7 @@ section('Packaging');
   else ok('Manifest is well formed');
 }
 
-section('Packaging: nothing reaches the network');
+section('Packaging: no hardcoded remote resource — Feeds fetches only a URL the user supplies at runtime');
 {
   const problems = [];
   for (const file of [...byExt('.js'), ...byExt('.css'), ...byExt('.html')]) {
@@ -665,8 +670,8 @@ section('Packaging: nothing reaches the network');
     });
   }
 
-  if (problems.length) fail('No remote resources are referenced anywhere', problems);
-  else ok('No remote resources are referenced anywhere');
+  if (problems.length) fail('No hardcoded remote resource is referenced anywhere', problems);
+  else ok('No hardcoded remote resource is referenced anywhere');
 }
 
 section('Packaging: fonts are bundled');

@@ -116,6 +116,38 @@ body {
   display: block;
 }
 
+/* The persistent way to find the keyboard cheatsheet. Shares the focus-flag's
+   corner, but the two are never on screen at once — focus mode hides this and
+   shows that. */
+.help-fab {
+  position: fixed;
+  inset-block-end: var(--space-4);
+  inset-inline-end: var(--space-4);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 32px;
+  block-size: 32px;
+  border-radius: var(--radius-pill);
+  background-color: var(--bg-raised);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  box-shadow: var(--shadow-md);
+  transition: color var(--dur-quick) var(--ease-out),
+              background-color var(--dur-quick) var(--ease-out);
+}
+
+.help-fab:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-card);
+}
+
+:root[data-focus="on"] .help-fab {
+  display: none;
+}
+
 /* ==========================================================================
    Clock
    ========================================================================== */
@@ -319,6 +351,46 @@ body {
   block-size: 4px;
   background-color: var(--accent);
   opacity: 1;
+}
+
+/* ---- Contrast over a photograph -----------------------------------------
+   Forcing --text-primary to black or white on an image background reads the
+   palette's own colour and reaches for a different one; a shadow keeps the
+   palette's own text colour and gives it somewhere to stand out from
+   regardless of what the photo underneath is doing — the way a film credit
+   sits over any frame, dark or light. Imperceptible on a dark photo, where it
+   is not needed; the reason the clock is legible on a bright one. */
+:root[data-bg="image"] .clock-time {
+  text-shadow: 0 0 8px rgb(var(--shadow-color) / 0.35), 0 0 24px rgb(var(--shadow-color) / 0.2);
+}
+
+:root[data-bg="image"] .clock-greeting,
+:root[data-bg="image"] .clock-date {
+  text-shadow: 0 0 8px rgb(var(--shadow-color) / 0.3);
+}
+
+:root[data-bg="image"] .waqt-now {
+  filter: drop-shadow(0 0 4px rgb(var(--shadow-color) / 0.5));
+}
+
+/* A little frosted glass behind the clock: the photo still shows through,
+   but the text always has a surface under it rather than only a shadow. */
+:root[data-bg="image"] .clock {
+  padding: var(--space-4);
+  background-color: rgb(var(--shadow-color) / 0.08);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  border-radius: var(--radius-lg);
+}
+
+/* The ring variant already gives the clock its own circular composition
+   inside the shortcut orbit; a rectangular card behind it would fight that
+   shape rather than support it. */
+:root[data-bg="image"] .clock-ring {
+  padding: 0;
+  background-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 /* ==========================================================================
@@ -1229,4 +1301,180 @@ body {
 .onboard-go {
   inline-size: 100%;
   justify-content: center;
+}
+
+/* ---- The tour: four cards after the Scene is picked --------------------- */
+
+.onboard-step {
+  position: relative;
+}
+
+.onboard-step[hidden] {
+  display: none;
+}
+
+.onboard-tour-card {
+  padding-block-start: var(--space-6);
+  min-block-size: 84px;
+  margin-block-end: var(--space-5);
+}
+
+.onboard-tour-title {
+  margin-block-end: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.onboard-tour-body {
+  font-size: var(--text-sm);
+  line-height: var(--leading-base);
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+
+.onboard-tour-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.onboard-dots {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.onboard-dot {
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: var(--radius-pill);
+  background-color: var(--border);
+  transition: background-color var(--dur-quick) var(--ease-out);
+}
+
+.onboard-dot.is-active {
+  background-color: var(--accent);
+}
+
+.onboard-tour-back:disabled {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* arrow_start is drawn pointing physically toward the start of the page —
+   correct in LTR, backwards once the page mirrors. */
+.onboard-tour-back svg {
+  transform: scaleX(var(--dir));
+}
+
+.onboard-tour-nav .onboard-go {
+  inline-size: auto;
+  padding-inline: var(--space-5);
+}
+
+.onboard-skip {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.onboard-skip:hover {
+  color: var(--text-primary);
+}
+
+/* ==========================================================================
+   Feeds
+   ========================================================================== */
+
+.feeds {
+  display: flex;
+  flex-direction: column;
+}
+
+.feed-row + .feed-row {
+  border-block-start: var(--hairline) solid var(--border);
+}
+
+.feed-unread {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--accent);
+}
+
+.feed-error {
+  flex: none;
+  display: inline-flex;
+  color: var(--text-muted);
+}
+
+/* The newest headline, under the feed's own row. Compact skips it — that
+   density is exactly what it trades headlines for. A <button>, not a link:
+   the click opens the article in a new tab via chrome.tabs.create rather than
+   navigating this one away, so there is no href for it to honestly carry. */
+.feed-headline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  inline-size: 100%;
+  padding: 0 var(--space-3) var(--space-2);
+  font-size: var(--text-xs);
+  line-height: var(--leading-tight);
+  color: var(--text-secondary);
+  transition: color var(--dur-quick) var(--ease-out);
+}
+
+.feed-headline:hover {
+  color: var(--text-primary);
+}
+
+.feed-headline span {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: start;
+}
+
+.feeds-compact .feed-headline {
+  display: none;
+}
+
+.feed-add,
+.feed-max {
+  color: var(--text-muted);
+}
+
+.feed-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.feed-form-status {
+  min-block-size: var(--text-sm);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.feed-form-hints {
+  margin-block-start: var(--space-3);
+  padding-block-start: var(--space-3);
+  border-block-start: var(--hairline) solid var(--border);
+}
+
+.feed-form-hint {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.feed-form-hint-label {
+  color: var(--text-secondary);
 }

@@ -5,16 +5,21 @@
 
 /* Lawha — the service worker.
  *
- * Four keyboard commands, the side-panel toggle, and the pieces of state that
- * have to be recorded while nothing is watching: when each tab was last looked
- * at, and what was open in case the browser dies. Everything else in the
- * extension happens in a page.
+ * Four keyboard commands, the side-panel toggle, the pieces of state that have
+ * to be recorded while nothing is watching, and — since Patch D — the one
+ * thing here that reaches past the extension's own package: fetching the feed
+ * URLs a person has explicitly added. That is the whole of the host
+ * permission's reach; there are no content scripts, so nothing here can read
+ * or touch any other page.
  *
- * No host permissions, so nothing here can read a page. It moves tabs around
- * and writes a handful of storage keys, and that is the whole of its reach. */
+ * A service worker has no DOM, so it cannot run DOMParser on what it fetches.
+ * offscreen.js is a hidden page that exists for exactly that gap — see
+ * ensureOffscreenDocument below. */
 
 import { get, setData, setPresentation, capped, LIMITS } from './shared/storage.js';
-import { sendMessage } from './shared/messaging.js';
+import { sendMessage, onMessage } from './shared/messaging.js';
+import { safeURL, uid, urlDedupeKey } from './shared/utils.js';
+import { MAX_FEEDS, FEED_REFRESH_MINUTES } from './shared/feeds.js';
 
 const DAY = 864e5;
 
@@ -101,7 +106,7 @@ async function saveActiveTabForLater() {
 
   const current = await get('later');
   // Saving the same page twice is a no-op, not a second row.
-  if (current.some((entry) => entry.url === tab.url)) return;
+  if (current.some((entry) => urlDedupeKey(entry.url) === urlDedupeKey(tab.url))) return;
 
   const next = [
     ...current,
@@ -257,6 +262,127 @@ async function pruneTabAges() {
   }
 }
 
+/* ---- Feeds ---------------------------------------------------------------
+ * The one place in Lawha that reaches past its own package. A feed is a URL
+ * someone typed in themselves; nothing is fetched that was not asked for, and
+ * the result never leaves chrome.storage.local — there is no Lawha server for
+ * it to go to.
+ *
+ * Refresh runs off an alarm rather than a startup hook, for the same reason
+ * the session snapshot does: alarms survive a service worker being torn down
+ * and a browser being restarted, so nothing has to run at launch to keep the
+ * thirty-minute cadence honest. */
+
+const FEED_FETCH_TIMEOUT_MS = 15_000;
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === 'feed-refresh') {
+    refreshAllFeeds().catch((error) => console.error('Lawha: feed refresh failed', error));
+  }
+});
+
+async function refreshAllFeeds() {
+  const feeds = await get('feeds');
+  if (!feeds.some((feed) => feed.enabled)) return;
+
+  const updated = await Promise.all(feeds.map((feed) => (feed.enabled ? fetchAndParseFeed(feed) : feed)));
+  await setData('feeds', updated);
+}
+
+async function fetchAndParseFeed(feed) {
+  try {
+    const xml = await fetchFeedText(feed.url);
+    const parsed = await parseFeedXML(xml, feed.items);
+
+    return {
+      ...feed,
+      // Sticky once set: the first successful fetch names the feed, and a
+      // later one does not quietly rename it out from under you.
+      title: feed.title || parsed.title || feed.url,
+      siteUrl: parsed.siteUrl || feed.siteUrl,
+      items: parsed.items,
+      lastFetched: Date.now(),
+      lastError: null,
+    };
+  } catch (error) {
+    // Marked, not removed — a feed server having a bad day is not a reason to
+    // lose the subscription.
+    return { ...feed, lastFetched: Date.now(), lastError: error.message || 'fetch_failed' };
+  }
+}
+
+async function fetchFeedText(url) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FEED_FETCH_TIMEOUT_MS);
+  try {
+    const response = await fetch(url, {
+      headers: { Accept: 'application/rss+xml, application/atom+xml, text/xml, */*' },
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.text();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+/* Parsing needs a real DOMParser, which a service worker does not have. The
+ * offscreen document is a hidden page that does — created on first use and
+ * then left open, since offscreen documents are cheap and tearing one down
+ * only to spin another up thirty minutes later buys nothing. */
+
+let offscreenReady = null;
+
+async function ensureOffscreenDocument() {
+  if (await chrome.offscreen.hasDocument()) return;
+  if (!offscreenReady) {
+    offscreenReady = chrome.offscreen.createDocument({
+      url: 'offscreen.html',
+      reasons: ['DOM_PARSER'],
+      justification: 'Parse RSS/Atom XML fetched from feed URLs the user added.',
+    });
+  }
+  await offscreenReady;
+  offscreenReady = null;
+}
+
+async function parseFeedXML(xml, existingItems) {
+  await ensureOffscreenDocument();
+  const response = await sendMessage({
+    type: 'lawha:parse-feed',
+    xml,
+    existingLinks: existingItems.map((item) => item.link),
+  });
+  if (!response?.ok) throw new Error(response?.error || 'parse_failed');
+  return response.result;
+}
+
+function isValidFeedURL(url) {
+  const parsed = safeURL(url);
+  return Boolean(parsed) && parsed.protocol === 'https:';
+}
+
+async function addFeed(url) {
+  if (!isValidFeedURL(url)) return { ok: false };
+
+  const current = await get('feeds');
+  if (current.length >= MAX_FEEDS) return { ok: false };
+  if (current.some((feed) => urlDedupeKey(feed.url) === urlDedupeKey(url))) return { ok: false };
+
+  const draft = { id: uid(), url, title: '', siteUrl: '', items: [], lastFetched: 0, lastError: null, enabled: true };
+  const fetched = await fetchAndParseFeed(draft);
+  if (fetched.lastError) return { ok: false };
+
+  await setData('feeds', [...current, fetched]);
+  return { ok: true };
+}
+
+onMessage((message, _sender, sendResponse) => {
+  if (message.type !== 'lawha:add-feed') return false;
+  addFeed(message.url).then(sendResponse);
+  return true;
+});
+
 /* There is no onStartup listener, and nothing is missing without one.
  *
  * The two things it used to do now happen on better signals. The session-restore
@@ -273,4 +399,9 @@ chrome.runtime.onInstalled.addListener(async () => {
   await chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: false });
   await pruneTabAges();
   await updateBadge();
+
+  // periodInMinutes on an existing alarm resets its schedule rather than
+  // creating a second one, so this is safe to run on every update too.
+  await chrome.alarms.create('feed-refresh', { periodInMinutes: FEED_REFRESH_MINUTES });
+  refreshAllFeeds().catch((error) => console.error('Lawha: feed refresh failed', error));
 });

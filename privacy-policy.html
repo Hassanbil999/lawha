@@ -125,13 +125,16 @@
 <body>
   <main>
     <h1>Lawha · لوحة — Privacy Policy</h1>
-    <p class="updated">Last updated: 16 August 2026</p>
+    <p class="updated">Last updated: 18 August 2026</p>
 
     <p class="lede">
-      Lawha does not collect, transmit, sell, or share any personal data.
-      It makes <strong>zero network requests</strong>. Everything it knows about you
-      stays in your own browser, and you can confirm that yourself in
-      DevTools → Network, where it will be empty.
+      Lawha does not collect, transmit, sell, or share any personal data. It
+      makes no network request of its own — the one exception is the Feeds
+      feature, which fetches only the RSS or Atom URLs you explicitly add,
+      directly from your browser to that feed's own server. Everything else it
+      knows about you stays in your own browser, and you can confirm all of
+      this yourself in DevTools → Network: with Feeds off, it is empty; with
+      Feeds on, it shows exactly the feed addresses you added and nothing else.
     </p>
 
     <h2>What Lawha is</h2>
@@ -161,6 +164,8 @@
       <li>Your background image, if you choose one from your own disk</li>
       <li>Tab access timestamps, used to mark a tab you have not looked at in a day</li>
       <li>A list of currently open tab addresses, so a browser crash does not lose your session</li>
+      <li>Your feed subscriptions, if you use Feeds — the URLs you added and the last
+        ten headlines fetched from each</li>
     </ul>
     <p>
       Preferences are small and are stored with Chrome Sync so they follow you
@@ -199,18 +204,46 @@
 
       <dt>sidePanel</dt>
       <dd>To display the sidebar.</dd>
+
+      <dt>alarms</dt>
+      <dd>To refresh your feeds roughly every 30 minutes in the background, if
+        you use Feeds, without keeping a connection open. Unused otherwise.</dd>
+
+      <dt>offscreen</dt>
+      <dd>To parse the RSS/Atom XML a feed returns. Chrome's background service
+        worker has no DOM, so this creates a hidden, invisible page purely to
+        read that XML — it is never shown, and never navigates anywhere.</dd>
+
+      <dt>host_permissions (all URLs)</dt>
+      <dd>Required so the background service worker can fetch the feed URLs
+        you add in Feeds — Chrome only bypasses a site's cross-origin
+        restrictions for a service worker when the manifest grants this.
+        It is used only for the fetch() calls Feeds makes to addresses you
+        typed in yourself. Lawha has no content scripts and cannot read,
+        modify, or inject anything into any web page you visit; this
+        permission does not change that.</dd>
     </dl>
+
+    <h2>Feed subscriptions</h2>
     <p>
-      Lawha requests <strong>no host permissions</strong>. It cannot read, modify,
-      or inject anything into the web pages you visit, and it has no content
-      scripts.
+      If you use the Feeds feature, Lawha fetches the RSS or Atom feed URLs
+      that you add. Those requests go directly from your browser to that
+      feed's own server — there is no Lawha server in between, and the feed
+      content is stored locally on your device, the same as your notes or
+      shortcuts. Lawha does not aggregate, analyse, or transmit which feeds
+      you follow or what you read. Feeds is off by default; nothing is
+      fetched unless you turn it on and add a feed yourself.
     </p>
 
     <h2>Network requests</h2>
     <p>
-      Lawha makes none. Fonts, icons and every other asset ship inside the
-      extension. Colours are computed on your machine. The extension's content
-      security policy permits no connection to any remote origin at all.
+      Lawha makes none of its own. Fonts, icons, the five built-in Scenes and
+      every other asset ship inside the extension; colours are computed on
+      your machine. The one exception is Feeds, described above: a request to
+      a feed URL you added yourself, and nothing else. Feeds is off by
+      default, and the extension code that fetches a feed only ever runs when
+      you turn Feeds on and add one — if you never do, nothing is ever
+      requested from anywhere but the extension's own package.
     </p>
 
     <h2>Scenes you import</h2>

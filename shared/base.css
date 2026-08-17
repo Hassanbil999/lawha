@@ -278,8 +278,28 @@ a {
   line-height: var(--leading-base);
   color: var(--text-muted);
   padding: var(--space-3) 0;
-  text-align: start;
+  text-align: center;
   text-wrap: pretty;
+}
+
+.l-empty-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.l-empty-block .l-empty {
+  padding-block-end: 0;
+}
+
+/* The one concrete gesture — "+", "Ctrl+Shift+S" — set in the same mono type
+   as the keyboard cheatsheet, so it reads as a key rather than a sentence. */
+.l-empty-hint {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  padding-block-end: var(--space-3);
 }
 
 /* Buttons. */
@@ -728,6 +748,65 @@ kbd {
 .l-tile-host .l-copy {
   inset-block-start: var(--space-2);
   translate: none;
+}
+
+/* A row with both a copy button and a delete button: wider reserved space,
+   and the two share one flex strip instead of each computing its own offset. */
+.l-row-actionable {
+  padding-inline-end: var(--space-7);
+}
+
+.l-row-actions {
+  position: absolute;
+  inset-inline-end: var(--space-2);
+  inset-block-start: 50%;
+  translate: 0 -50%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.l-tile-host .l-row-actions {
+  inset-block-start: var(--space-2);
+  translate: none;
+}
+
+.l-row-actions .l-copy,
+.l-row-actions .l-remove {
+  position: static;
+  translate: none;
+}
+
+.l-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 22px;
+  block-size: 22px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity var(--dur-quick) var(--ease-out),
+              color var(--dur-quick) var(--ease-out),
+              background-color var(--dur-quick) var(--ease-out);
+}
+
+.l-remove svg {
+  inline-size: 14px;
+  block-size: 14px;
+}
+
+.l-row-host:hover .l-remove,
+.l-row-host:focus-within .l-remove,
+.l-tile-host:hover .l-remove,
+.l-tile-host:focus-within .l-remove,
+.l-remove:focus-visible {
+  opacity: 1;
+}
+
+.l-remove:hover {
+  background-color: var(--bg-raised);
+  color: var(--accent);
 }
 
 /* A character counter, shown only as a limit comes into view. */

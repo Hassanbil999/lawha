@@ -253,6 +253,7 @@ async function run() {
     /* The security layer, and the checkbox reading. */
     await securitySweep();
     await checkboxSweep();
+    await feedSweep();
   } finally {
     for (const key of DATA_KEYS) await setData(key, snapshot[key]);
   }
@@ -426,6 +427,28 @@ async function checkboxSweep() {
   );
 
   await setData('notes', before);
+}
+
+/* ---- Feeds: a real fetch, through the real service worker ---------------
+ * The only step here that touches the network — deliberately: it is the one
+ * claim ("adding a feed actually fetches it") that a fixture cannot stand in
+ * for. A known-good public feed, added and then removed; the finally block
+ * above already restores the pre-test feed list regardless. */
+
+async function feedSweep() {
+  const TEST_URL = 'https://feeds.bbcarabic.com/bbcarabic/news/rss.xml';
+
+  const response = await chrome.runtime.sendMessage({ type: 'lawha:add-feed', url: TEST_URL });
+  const stored = await get('feeds');
+  const added = stored.find((feed) => feed.url === TEST_URL);
+
+  step(
+    'A9. Adding a feed URL fetches it through the service worker and stores items',
+    Boolean(response?.ok) && Boolean(added) && added.items.length > 0,
+    response?.ok
+      ? `stored ${added?.items.length ?? 0} item(s), lastError: ${added?.lastError ?? 'none'}`
+      : `lawha:add-feed responded ${JSON.stringify(response)}`
+  );
 }
 
 document.getElementById('run').addEventListener('click', () => {

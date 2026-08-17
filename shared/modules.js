@@ -72,6 +72,16 @@ export const MODULES = {
     defaults: {},
   },
 
+  feeds: {
+    labelKey: 'sec_feeds',
+    // Off by default: an existing Scene that never mentions feeds should not
+    // sprout a new module the day this ships. It stays opt-in, added through
+    // the gallery builder like any other module choice.
+    variants: ['list', 'compact', 'off'],
+    default: 'off',
+    defaults: {},
+  },
+
   // There was a `tabs` module here, rendered by the side panel in four
   // variants. The side panel is now a live tuning surface for the active
   // Scene, so the module has no surface to draw on and has been retired.

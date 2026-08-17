@@ -256,6 +256,51 @@ export function copyButton(url, t, iconOf) {
   return button;
 }
 
+/**
+ * A module with nothing in it yet: what to do about that, and — where there
+ * is one concrete gesture rather than a paragraph of options — the exact key
+ * or symbol for it, set apart in the mono type the rest of the keyboard
+ * cheatsheet uses. Recent and Collections fill themselves in from browsing
+ * you already do, so they take no `hint`; everything you add yourself does.
+ */
+export function emptyState(text, hint = null) {
+  return el('div', { class: 'l-empty-block' }, [
+    el('p', { class: 'l-empty', text }),
+    hint ? el('p', { class: 'l-empty-hint', text: hint }) : null,
+  ]);
+}
+
+/**
+ * A delete-the-row button for a row that is itself a link — the visible,
+ * always-reachable twin of the context-menu "Remove" item, not a replacement
+ * for it. No confirmation: removing one saved page is not a decision that
+ * deserves a modal, and the item was never anything but a pointer to a page
+ * that still exists everywhere else.
+ *
+ * @param {Function} onRemove  called with no arguments on click
+ * @param {Function} t         translator, for the label
+ * @param {Function} iconOf    icon factory (ctx.icon), so utils stays sprite-agnostic
+ */
+export function removeButton(onRemove, t, iconOf) {
+  const button = el('button', {
+    class: 'l-remove',
+    type: 'button',
+    tabindex: '-1',
+    'aria-label': t('action_remove'),
+    title: t('action_remove'),
+  });
+  button.append(iconOf('close'));
+
+  button.addEventListener('click', (event) => {
+    // The row underneath is a link. This click is not for it.
+    event.preventDefault();
+    event.stopPropagation();
+    onRemove();
+  });
+
+  return button;
+}
+
 /* ---- Context menu -------------------------------------------------------
  * One implementation, shared by the shortcut grid and the tab list. Closes on
  * the next click, on Escape, and on scroll. Positioned with logical insets so
@@ -479,9 +524,12 @@ export function relativeTime(timestamp, t, digits = (s) => s) {
   return digits(String(days)) + t('time_d');
 }
 
-/** Fraction of the day elapsed, 0 at 00:00 and approaching 1 at 23:59. */
+/** Fraction of the day elapsed, 0 at 00:00 and approaching 1 at 23:59.
+ *  Floored just above zero: at literal 0 the Waqt arc's past-stroke collapses
+ *  to a zero-length dash, which some Chrome versions render as a glitch
+ *  rather than nothing. */
 export function dayProgress(date = new Date()) {
-  return (date.getHours() * 60 + date.getMinutes()) / 1440;
+  return Math.max(0.001, (date.getHours() * 60 + date.getMinutes()) / 1440);
 }
 
 /** Greeting band for the hour. */
@@ -593,6 +641,13 @@ export function debounce(fn, ms = 120) {
 /** Stable id for locally created records. */
 export function uid() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+/** A URL as a case- and trailing-slash-insensitive key, for deduping. Two
+ *  entries for "https://Example.com/" and "https://example.com" are the same
+ *  save, not two of them. */
+export function urlDedupeKey(url) {
+  return String(url).trim().toLowerCase().replace(/\/+$/, '');
 }
 
 /** Remove duplicates by a derived key, keeping first occurrence. */

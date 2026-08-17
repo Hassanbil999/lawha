@@ -10,7 +10,7 @@
  * Folders with nothing in them are dropped: an empty folder is filing, not
  * content, and it should not cost you a row on the page you look at most. */
 
-import { el, faviconImage, identityTile, domainOf } from '../shared/utils.js';
+import { el, faviconImage, identityTile, domainOf, emptyState } from '../shared/utils.js';
 
 export const id = 'bookmarks';
 
@@ -41,11 +41,7 @@ export async function render(cfg, ctx) {
   const folders = await load(cfg);
 
   if (!folders.length) {
-    return ctx.section(
-      'sec_collections',
-      el('p', { class: 'l-empty', text: ctx.t('bookmarks_empty') }),
-      { module: id }
-    );
+    return ctx.section('sec_collections', emptyState(ctx.t('bookmarks_empty')), { module: id });
   }
 
   const renderers = {

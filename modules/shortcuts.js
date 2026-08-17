@@ -15,7 +15,7 @@
  * A Scene's `max` caps what is *drawn*, never what is *kept*. Switching to a
  * Scene that shows eight of your twelve shortcuts leaves twelve in storage. */
 
-import { el, faviconImage, identityTile, contextMenu, domainOf, safeURL } from '../shared/utils.js';
+import { el, faviconImage, identityTile, contextMenu, domainOf, safeURL, emptyState } from '../shared/utils.js';
 import { get, updateData, capped, LIMITS } from '../shared/storage.js';
 
 export const id = 'shortcuts';
@@ -31,7 +31,7 @@ export async function render(cfg, ctx) {
       : renderGrid(shown, cfg, ctx);
 
   if (!all.length) {
-    grid.append(el('p', { class: 'l-empty', text: ctx.t('shortcuts_empty') }));
+    grid.append(emptyState(ctx.t('shortcuts_empty'), '+'));
   }
 
   const hint = el('p', { class: 'shortcuts-filter', role: 'status', hidden: true });

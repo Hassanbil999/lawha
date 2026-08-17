@@ -71,6 +71,8 @@ const EXPECTED_PERMISSIONS = [
   'storage',
   'favicon',
   'sidePanel',
+  'alarms',
+  'offscreen',
 ];
 
 const permissions = manifest.permissions ?? [];
@@ -87,16 +89,23 @@ assert(
 
 assert(!missing.length, 'Every declared permission is present', missing.join(', '));
 
+/* Patch D: host_permissions is now deliberate, not an oversight. Feeds fetches
+ * the RSS/Atom URLs a person explicitly adds, and Chrome extension service
+ * workers only bypass CORS with a host permission in the manifest — there is
+ * no narrower grant that still lets an arbitrary feed URL be added. The
+ * privacy policy and store listing are written to disclose exactly this. */
 assert(
-  !manifest.host_permissions,
-  'No host_permissions',
-  'host permissions widen the review scope and Lawha needs none'
+  Array.isArray(manifest.host_permissions) &&
+    manifest.host_permissions.length === 1 &&
+    manifest.host_permissions[0] === '<all_urls>',
+  "host_permissions is exactly ['<all_urls>']",
+  `found: ${JSON.stringify(manifest.host_permissions)} — Feeds needs this to fetch a URL someone adds; anything else is undeclared surface`
 );
 
 assert(
   !manifest.content_scripts,
   'No content scripts',
-  'Lawha never runs in a page it does not own'
+  'Lawha never runs in a page it does not own — host_permissions here is only for background fetch()'
 );
 
 /* ---- Content security policy --------------------------------------------- */
@@ -105,13 +114,14 @@ const csp = manifest.content_security_policy?.extension_pages ?? '';
 
 assert(Boolean(csp), 'An explicit extension_pages CSP is declared');
 
-/* `connect-src 'self'` is what proves the zero-network claim: the extension's
- * own package is reachable — scenes/*.json is loaded with fetch — and no remote
- * origin is. `'none'` would be stricter on paper and would break loading the
- * built-in Scenes, which is worse than a promise kept literally. */
+/* `connect-src *` is Patch D's one deliberate loosening: Feeds fetches
+ * whatever RSS/Atom URL a person adds, so the origin is not known in advance.
+ * Every other directive stays pinned to 'self' — nothing here can load a
+ * remote script, style, or frame, only fetch() a feed URL from the service
+ * worker. */
 assert(
-  /connect-src\s+'self'\s*(;|$)/.test(csp),
-  "connect-src is 'self' — no remote origin is reachable",
+  /connect-src\s+\*\s*(;|$)/.test(csp),
+  "connect-src is '*' — Feeds fetches an arbitrary URL the user adds",
   `found: ${csp}`
 );
 
@@ -123,9 +133,11 @@ for (const directive of ['script-src', 'object-src', 'style-src', 'default-src']
   );
 }
 
+/* connect-src '*' is the one deliberate exception — see above — so this only
+ * has to prove no *other* directive smuggled in a remote origin or unsafe-*. */
 assert(
-  !/unsafe-inline|unsafe-eval|https?:/.test(csp),
-  'CSP allows no inline code, no eval, and no remote origin',
+  !/unsafe-inline|unsafe-eval|https?:/.test(csp.replace(/connect-src[^;]*/, '')),
+  'CSP allows no inline code, no eval, and no remote origin outside connect-src',
   `found: ${csp}`
 );
 

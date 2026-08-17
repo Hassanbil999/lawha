@@ -25,7 +25,7 @@
  * never a schema. A note written here opens as readable text anywhere else, and
  * nothing has to migrate if this feature is ever taken back out. */
 
-import { el, uid, contextMenu, debounce, replaceChildren } from '../shared/utils.js';
+import { el, uid, contextMenu, debounce, replaceChildren, emptyState } from '../shared/utils.js';
 import { get, updateData, capped, LIMITS } from '../shared/storage.js';
 
 export const id = 'notes';
@@ -60,7 +60,7 @@ export async function render(cfg, ctx) {
   wrap.append(buildAdd(ctx));
 
   if (!all.length) {
-    wrap.append(el('p', { class: 'l-empty', text: ctx.t('notes_empty') }));
+    wrap.append(emptyState(ctx.t('notes_empty'), '+'));
   }
 
   return ctx.section('sec_notes', wrap, { module: id });
@@ -100,10 +100,9 @@ function buildNote(note, ctx) {
   }, 400);
 
   function paintCounter() {
-    const remaining = LIMITS.noteBody - text.length;
     const near = text.length >= COUNTER_FROM;
     counter.hidden = !near;
-    if (near) counter.textContent = ctx.fmtNum(remaining);
+    if (near) counter.textContent = `${ctx.fmtNum(text.length)} / ${ctx.fmtNum(LIMITS.noteBody)}`;
   }
 
   function paintView() {
