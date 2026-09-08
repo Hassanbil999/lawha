@@ -78,5 +78,13 @@ contrast, the data-preservation guard, manifest validity and translation
 completeness. `tools/selftest.html`, loaded as an extension page, runs the
 data-preservation test against real storage.
 
+`node tools/browser-check.mjs` settles what a grep cannot: it loads the
+extension into a headless Chrome and checks that the new tab boots and draws a
+Scene, that onboarding runs once, that text clears 4.5:1 over every gradient in
+every Scene, that the gallery's previews fill their cards, and that adding a
+feed goes fetch → offscreen parse → storage → headline. It is slower than the
+rest and needs Chrome, so it sits outside `pre-submission.sh`; run it on any
+change that touches rendering.
+
 ## License
 MIT
