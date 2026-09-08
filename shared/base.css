@@ -101,15 +101,27 @@ a {
    as it was before. The hierarchy compresses over a busy background, which is
    the right way round: that is where it was doing the least work.
 
-   Declared on <body> rather than :root because a custom property cannot refer
-   to itself on the same element — from here the var() reads the inherited
-   value, which is exactly the one being stepped. Named per background mode
-   rather than "not theme", so the side panel and the gallery — which paint no
-   layer and so carry no data-bg at all — are left alone. */
+   The step has to read the palette's value under a second name. Putting
+   var(--text-secondary) inside --text-secondary's own value is a cycle even
+   when the two live on different elements: var() always resolves against the
+   element being computed, so on <body> it is the body declaration referring to
+   itself. A cycle does not fall back to the inherited value — it makes the
+   property invalid, which made every var(--text-secondary) on the page invalid
+   too, and an invalid `color` inherits: all three tiers rendered as
+   --text-primary exactly. These aliases are what the step reads instead.
+
+   Named per background mode rather than "not theme", so the side panel and the
+   gallery — which paint no layer and so carry no data-bg at all — are left
+   alone. */
+:root {
+  --text-secondary-base: var(--text-secondary);
+  --text-muted-base: var(--text-muted);
+}
+
 :root[data-bg="gradient"] body,
 :root[data-bg="image"] body {
-  --text-secondary: color-mix(in srgb, var(--text-primary) 55%, var(--text-secondary));
-  --text-muted: color-mix(in srgb, var(--text-primary) 45%, var(--text-muted));
+  --text-secondary: color-mix(in srgb, var(--text-primary) 55%, var(--text-secondary-base));
+  --text-muted: color-mix(in srgb, var(--text-primary) 45%, var(--text-muted-base));
 }
 
 /* Focus mode takes the scrim off entirely. The scrim exists to keep text

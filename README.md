@@ -80,5 +80,3 @@ data-preservation test against real storage.
 
 ## License
 MIT
-
----

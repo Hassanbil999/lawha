@@ -132,9 +132,16 @@
 
 /* The preview is the real new tab page at full size, scaled down. 1120×700 at
    0.25 lands at 280×175 — the card is a window onto the thing itself. */
+/* Sized by the column, the same way the builder's own preview is: the grid is
+   `auto-fill, minmax(260px, 1fr)`, so a card is whatever the row division makes
+   it and never the 280px a fixed scale(0.25) of a 1120px page assumes. Held to
+   one factor the preview gapped on a narrow window and was cropped on a wide
+   one — the page inside is the same page either way, so the scale has to come
+   from the container. */
 .gal-card-preview {
   position: relative;
-  block-size: 175px;
+  container-type: inline-size;
+  aspect-ratio: 1120 / 700;
   overflow: hidden;
   background-color: var(--bg-raised);
   border-block-end: var(--hairline) solid var(--border);
@@ -147,13 +154,15 @@
   inline-size: 1120px;
   block-size: 700px;
   border: 0;
-  transform: scale(0.25);
+  /* Divided by 1120px, not 1120 — see the note on .gal-preview-frame. */
+  transform: scale(calc(100cqw / 1120px));
   transform-origin: 0 0;
   pointer-events: none;
 }
 
-/* The frame is a 1120px page pinned by its inline-start edge inside a 280px
-   window, so the corner the scale has to hold still is the inline-start one.
+/* The frame is a 1120px page pinned by its inline-start edge inside a much
+   smaller window, so the corner the scale has to hold still is the inline-start
+   one.
    `0 0` is the physical top-left, which under RTL is 840px outside the card —
    the preview scaled toward a point off the side of its own window and the
    whole grid came up blank in Arabic. transform-origin takes no logical
