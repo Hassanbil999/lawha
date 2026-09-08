@@ -20,6 +20,7 @@
  * and starts being a five-second fix. */
 
 import { t } from './i18n.js';
+import { blend, contrastRatio, hexToRgb } from './utils.js';
 
 /** Ten presets. Names are the ids; the labels live in i18n under grad_*. */
 export const GRADIENT_PRESETS = [
@@ -64,11 +65,84 @@ export function gradientCSS(gradient) {
 /** Past this the background has stopped being a background. */
 export const SCRIM_MAX = 80;
 
+/* ---- The legibility floor -----------------------------------------------
+ * A palette's text colours are mixed against that palette's own canvas. Put a
+ * night-sky gradient behind them and the canvas is no longer what the text is
+ * sitting on, so the ratios the palette was built to hold stop holding — near
+ * black type on a near black photograph, which is what "beautiful background,
+ * can't read anything" actually means.
+ *
+ * Correcting the text instead of the backdrop is the tempting fix and it is
+ * wrong: the same tokens are drawn on opaque cards, so lightening them for a
+ * dark backdrop makes a note invisible on its own white card. The backdrop is
+ * the only surface that can move without taking something else with it.
+ *
+ * So the stored scrim is a preference and this is a floor under it: enough
+ * wash of --bg-canvas that --text-primary clears 4.5:1 against what it ends up
+ * on. On a background that suits the palette it computes to zero and nothing
+ * changes.
+ *
+ * The floor is measured on --text-primary alone, and that is a decision rather
+ * than an oversight. Holding the quieter tokens to their own ratios as well
+ * needs half again as much wash, and past about half a night sky is a grey
+ * rectangle — the background has been deleted to save the labels on top of it.
+ * The labels are handled the other way instead, in base.css: over anything but
+ * a flat canvas they step toward --text-primary, which costs the picture
+ * nothing because it only ever raises contrast, on the backdrop and on an
+ * opaque card alike. */
+const TEXT_PRIMARY_MIN = 4.5;
+
+/** The colour content actually sits on: the layer with `percent` of the canvas
+ *  washed over it. */
+function composite(canvasHex, layerHex, percent) {
+  return blend(canvasHex, layerHex, percent / 100);
+}
+
+function readable(primary, backdrop) {
+  return contrastRatio(primary, backdrop) >= TEXT_PRIMARY_MIN;
+}
+
+/**
+ * The smallest scrim, at or above `from`, that keeps the palette's text
+ * readable over `layers`. Returns `from` unchanged when nothing is fighting,
+ * and never exceeds SCRIM_MAX — past that the background has stopped being one.
+ *
+ * @param {string[]} layers  the colours behind the content: a gradient's stops,
+ *                           or the dominant colours of an image.
+ */
+export function legibilityFloor(layers, { canvas, primary }, from = 0) {
+  const stops = layers.filter((hex) => hexToRgb(hex));
+  if (!stops.length || !hexToRgb(canvas) || !hexToRgb(primary)) return from;
+
+  let percent = Math.max(0, from);
+  // Five points at a time: finer steps buy a fraction of a ratio point and
+  // cost a wash nobody can see the difference in.
+  while (
+    percent < SCRIM_MAX &&
+    !stops.every((hex) => readable(primary, composite(canvas, hex, percent)))
+  ) {
+    percent += 5;
+  }
+  return Math.min(SCRIM_MAX, percent);
+}
+
+/**
+ * Paint the background layer.
+ *
+ * `imagePalette` is the palette Istikhraj derived from the wallpaper, when
+ * there is one. It is the only read we have on what an image is doing under
+ * the text, so it is what the floor is measured against; without it an image
+ * keeps whatever scrim it was given.
+ */
 export function applyBackground(
-  { background = 'theme', gradient = null, wallpaper = null, scrim = 20 } = {},
+  { background = 'theme', gradient = null, wallpaper = null, scrim = 20, imagePalette = null } = {},
   root = document.documentElement
 ) {
-  const percent = Math.min(SCRIM_MAX, Math.max(0, Number(scrim) || 0));
+  const chosen = Math.min(SCRIM_MAX, Math.max(0, Number(scrim) || 0));
+  const percent = Math.min(
+    SCRIM_MAX,
+    Math.max(chosen, floorFor(background, gradient, imagePalette, root, chosen))
+  );
   const wash = `color-mix(in srgb, var(--bg-canvas) ${percent}%, transparent)`;
 
   const setLayer = (layer, { scrim: over = 'transparent', size = 'auto', position = '50% 50%' } = {}) => {
@@ -99,6 +173,34 @@ export function applyBackground(
   // of itself would do nothing but cost a paint.
   setLayer('var(--bg-canvas)');
   root.dataset.bg = 'theme';
+}
+
+/**
+ * The floor for the background actually being painted.
+ *
+ * Tokens are read off the element rather than kept as a second copy in
+ * JavaScript, exactly as readPaletteTokens does, so a custom or extracted
+ * palette is measured as it really resolves — and so this stays correct after
+ * a palette change without knowing one happened.
+ */
+function floorFor(background, gradient, imagePalette, root, from) {
+  const element = root.nodeType === 1 ? root : document.documentElement;
+  if (!element || typeof getComputedStyle !== 'function') return from;
+
+  let layers = [];
+  if (background === 'gradient') {
+    layers = (gradient?.colors ?? []).map((c) => String(c).trim()).filter((c) => HEX.test(c));
+  } else if (background === 'image' && imagePalette) {
+    // The two surfaces Istikhraj read out of the picture. Its accent is a
+    // highlight rather than something text sits on, so it is left out.
+    layers = [imagePalette['bg-canvas'], imagePalette['bg-card']].filter(Boolean);
+  }
+  if (!layers.length) return from;
+
+  const styles = getComputedStyle(element);
+  const token = (name) => styles.getPropertyValue(`--${name}`).trim();
+
+  return legibilityFloor(layers, { canvas: token('bg-canvas'), primary: token('text-primary') }, from);
 }
 
 export const MAX_IMAGE_BYTES = 3 * 1024 * 1024;

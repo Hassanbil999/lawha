@@ -710,6 +710,13 @@ export function remixScene(scene, { id, name, credit = true } = {}) {
     ...copy.meta,
     id: id || `scene-${Math.random().toString(36).slice(2, 8)}`,
     name: name || copy.meta.name,
+    // The Arabic name and the author belong to the Scene this was copied from,
+    // not to the copy. Carried over, a Scene you named "Morning" still called
+    // itself ديوان in Arabic and still credited someone who never saw it —
+    // and in the gallery it was indistinguishable from the original. Where
+    // the source deserves credit it gets it, once, in remixOf.
+    nameAr: '',
+    author: '',
     created: new Date().toISOString(),
     remixOf: isDerived
       ? {
@@ -726,8 +733,13 @@ export function remixScene(scene, { id, name, credit = true } = {}) {
  *  customScenes is a SCENE_KEY, so this never trips the data guard. */
 export async function saveCustomScene(scene) {
   const custom = await get('customScenes');
-  const next = custom.filter((s) => s?.meta?.id !== scene.meta.id);
-  next.push(scene);
+  const at = custom.findIndex((s) => s?.meta?.id === scene.meta.id);
+  const next = [...custom];
+  // Replaced where it stands rather than removed and re-appended: a Scene that
+  // jumps to the end of the gallery every time you edit it is a Scene you
+  // have to go looking for again after every change.
+  if (at === -1) next.push(scene);
+  else next[at] = scene;
   await setPresentation('customScenes', next);
   return scene;
 }

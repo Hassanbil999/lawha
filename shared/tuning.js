@@ -204,6 +204,9 @@ export async function mountTuningPanel(root, { onToast = () => {} } = {}) {
     await setPresentation('palette', id);
     await applyPresentation(state.scene);
     paintPalettes();
+    // How much scrim a background needs is a question about the palette too,
+    // so the swatch is repainted alongside it.
+    paintBackground();
   }
 
   /**
@@ -231,6 +234,7 @@ export async function mountTuningPanel(root, { onToast = () => {} } = {}) {
     await setPresentation('palette', tokens);
     await applyPresentation(state.scene);
     paintPalettes();
+    paintBackground();
     if (corrected.length) pulse(sections.palette.querySelector('.tune-custom-wrap'));
   }
 
@@ -381,6 +385,7 @@ export async function mountTuningPanel(root, { onToast = () => {} } = {}) {
         gradient: state.prefs.gradient,
         wallpaper: state.prefs.wallpaper,
         scrim: state.prefs.bgScrim,
+        imagePalette: state.prefs.imageExtractedPalette,
       },
       bgPreview
     );
@@ -424,6 +429,7 @@ export async function mountTuningPanel(root, { onToast = () => {} } = {}) {
           gradient: state.prefs.gradient,
           wallpaper: state.prefs.wallpaper,
           scrim: state.prefs.bgScrim,
+          imagePalette: state.prefs.imageExtractedPalette,
         },
         bgPreview
       );

@@ -89,6 +89,29 @@ a {
   transition: opacity var(--dur-slow) var(--ease-out);
 }
 
+/* Over a gradient or a photograph the quiet tokens stop being quiet and start
+   being absent: --text-muted is mixed to sit a certain distance from
+   --bg-canvas, and --bg-canvas is not what a section label is on any more.
+
+   The scrim brings the backdrop back toward the canvas far enough for
+   --text-primary; carrying --text-secondary and --text-muted the rest of the
+   way by wash would cost half the picture again, so they are stepped toward
+   --text-primary instead. That can only raise contrast — on the backdrop and
+   on an opaque card alike — so a note stays as readable on its own white card
+   as it was before. The hierarchy compresses over a busy background, which is
+   the right way round: that is where it was doing the least work.
+
+   Declared on <body> rather than :root because a custom property cannot refer
+   to itself on the same element — from here the var() reads the inherited
+   value, which is exactly the one being stepped. Named per background mode
+   rather than "not theme", so the side panel and the gallery — which paint no
+   layer and so carry no data-bg at all — are left alone. */
+:root[data-bg="gradient"] body,
+:root[data-bg="image"] body {
+  --text-secondary: color-mix(in srgb, var(--text-primary) 55%, var(--text-secondary));
+  --text-muted: color-mix(in srgb, var(--text-primary) 45%, var(--text-muted));
+}
+
 /* Focus mode takes the scrim off entirely. The scrim exists to keep text
    readable over a photograph, and focus mode has removed all but the clock —
    so the picture can come back, at full strength, with nothing left on top of
@@ -153,7 +176,13 @@ a {
   text-transform: uppercase;
 }
 
-:root[data-labels="off"] .l-label {
+/* Only the Scene's own section headings answer to this. `.l-label` is also the
+   caption on a form field, a group in the tuning panel, and a control in the
+   builder — chrome rather than content, and hiding it leaves an unlabelled
+   input rather than a calmer canvas. Scoping to the Scene root is what keeps
+   "section labels: off" a statement about the new tab and not about every
+   surface that happens to share a stylesheet. */
+:root[data-labels="off"] .scene .l-label {
   display: none;
 }
 

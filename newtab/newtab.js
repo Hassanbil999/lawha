@@ -225,14 +225,30 @@ async function renderRegions(regions, modules) {
 
 /* ---- Boot --------------------------------------------------------------- */
 
+/**
+ * The background layer, and the scrim that keeps text readable over it.
+ *
+ * Repainted after every palette change as well as after a background change,
+ * because the scrim's floor is a question about both: how much wash it takes
+ * before this palette's text is readable on this backdrop. The work is a
+ * handful of custom-property writes, so re-running it costs nothing next to
+ * getting it wrong in the direction of an unreadable page.
+ */
 async function paintBackground() {
-  const { background, gradient, wallpaper, bgScrim } = await getMany([
+  const { background, gradient, wallpaper, bgScrim, imageExtractedPalette } = await getMany([
     'background',
     'gradient',
     'wallpaper',
     'bgScrim',
+    'imageExtractedPalette',
   ]);
-  applyBackground({ background, gradient, wallpaper, scrim: bgScrim });
+  applyBackground({
+    background,
+    gradient,
+    wallpaper,
+    scrim: bgScrim,
+    imagePalette: imageExtractedPalette,
+  });
 }
 
 async function applyFocusMode() {
@@ -284,8 +300,23 @@ async function bootPreview() {
     if (event.data?.type !== 'lawha:preview') return;
     const scene = normalizeScene(event.data.scene);
     currentScene = await applySceneObject(scene, { renderRegions });
+    // The draft's palette is what the scrim has to be measured against, so the
+    // preview shows the same wash the applied Scene would get.
+    await paintBackground();
     // Acked so a caller can await the paint instead of guessing at a delay.
     parent.postMessage({ type: 'lawha:preview-painted', scene: scene.meta.id }, location.origin);
+  });
+
+  // A preview outlives a language switch — the gallery keeps its cards rather
+  // than rebuilding them, which is what keeps the grid from blinking, and a
+  // frame that never hears about the switch goes on previewing the Scene in
+  // the language it was opened in.
+  onChanged(async (changes) => {
+    if (changes.language) await setLanguage(changes.language.newValue, { persist: false });
+    if (changes.numerals) await setNumerals(changes.numerals.newValue, { persist: false });
+  });
+  onLanguageChange(() => {
+    if (currentScene) renderRegions(currentScene.regions, currentScene.modules);
   });
 
   // Tell the builder we are ready for the first draft.
@@ -303,6 +334,9 @@ async function boot() {
 
   await Promise.all([paintBackground(), applyFocusMode()]);
   await draw();
+  // Again, now the Scene's palette is on the page: the first call had only the
+  // markup's default to measure the scrim against.
+  await paintBackground();
   mountHelpButton();
 
   bindPaletteShortcut(document);
@@ -670,6 +704,9 @@ function wireStorage() {
         ['palette', 'density', 'sectionLabels'].includes(key)
       );
       await draw({ force: overrideChanged });
+      // A new Scene can bring a new palette, and the scrim is measured against
+      // whichever one is on the page.
+      await paintBackground();
       return;
     }
 

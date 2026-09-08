@@ -148,10 +148,19 @@
   block-size: 700px;
   border: 0;
   transform: scale(0.25);
-  /* `0 0` rather than a physical keyword; the frame is a fixed-size box, so
-     this is correct in both directions. */
   transform-origin: 0 0;
   pointer-events: none;
+}
+
+/* The frame is a 1120px page pinned by its inline-start edge inside a 280px
+   window, so the corner the scale has to hold still is the inline-start one.
+   `0 0` is the physical top-left, which under RTL is 840px outside the card —
+   the preview scaled toward a point off the side of its own window and the
+   whole grid came up blank in Arabic. transform-origin takes no logical
+   keyword, so the direction is named here instead. */
+:root[dir="rtl"] .gal-card-frame,
+:root[dir="rtl"] .gal-preview-frame {
+  transform-origin: 100% 0;
 }
 
 .gal-card-body {
@@ -286,7 +295,12 @@
 }
 
 /* Scaled by container width rather than a fixed factor, so the preview stays
-   a faithful 1120px page at whatever size the column happens to be. */
+   a faithful 1120px page at whatever size the column happens to be.
+
+   Both operands are lengths: scale() takes a number, and a length over a bare
+   number is still a length, so `100cqw / 1120` made the whole declaration
+   invalid and the preview quietly showed the top-left third of the page at
+   1:1 instead of the page. Dividing by 1120px is what yields the ratio. */
 .gal-preview-frame {
   position: absolute;
   inset-block-start: 0;
@@ -294,7 +308,7 @@
   inline-size: 1120px;
   block-size: 700px;
   border: 0;
-  transform: scale(calc(100cqw / 1120));
+  transform: scale(calc(100cqw / 1120px));
   transform-origin: 0 0;
   pointer-events: none;
 }
