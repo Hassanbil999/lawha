@@ -1,90 +1,115 @@
 # Lawha · لوحة
 
-Your browser's new tab, redesigned as a personal canvas.
+![vibe coded](https://img.shields.io/badge/vibe-coded-ff69b4) ![status](https://img.shields.io/badge/status-v1.1.1-brightgreen) ![license](https://img.shields.io/badge/license-MIT-blue)
 
-## What it does
+> **In one line:** a Chrome extension that replaces the boring new-tab page with a personal canvas you arrange yourself.
 
-Lawha replaces Chrome's blank new tab with a page you arrange yourself: the
-links you actually use, the pages you were just on, your bookmark folders, a few
-notes, and a short queue of things to read later. A side panel lists the tabs
-open in the current window, and lets you adjust how the whole thing looks
-without leaving the page you are looking at.
+---
 
+## 1. The idea (why it exists)
 
+Chrome's new tab is mostly empty. Lawha (لوحة = "board / painting") turns it into a page made of the things you actually use:
 
+- the links you visit most,
+- the pages you were just on,
+- your bookmark folders,
+- a few notes,
+- a short "read later" queue.
 
+A **side panel** lists the open tabs in your window and lets you change the whole look without leaving the page.
 
-## Scenes
+## 2. Main concepts (notes)
 
-A Scene is a JSON file describing a complete arrangement: the colour palette,
-the grid, and the variant every module renders in. Five ship with the extension
-— Diwan, Rasf, Satr, Falak and Warsha — and switching between them changes the
-layout, not just the paint.
+### Modules = the building blocks
+Each box on the page is a module (in `modules/`):
 
-Open the gallery from the side panel to browse them, apply one, or build your
-own by remixing an existing Scene. Export saves it as a file; anyone who imports
-that file sees exactly what you saw. Switching Scenes never touches your notes,
-shortcuts or reading queue — that boundary is enforced in the storage layer, not
-left to good intentions.
+| Module | What it does |
+|---|---|
+| `clock` | Time and date |
+| `waqt` (وقت) | A thin line showing how far through the day you are |
+| `shortcuts` | Your favourite links |
+| `recent` | Pages you just visited |
+| `bookmarks` | Your bookmark folders |
+| `notes` | Quick notes |
+| `later` | Read-later queue |
+| `search` | Search tabs, bookmarks and history together |
+| `feeds` (متابعات) | RSS/Atom headlines. Opt-in, off by default |
 
-## Keyboard shortcuts
+### Scenes = whole looks
+A **Scene** is one JSON file that describes everything: colour palette, grid layout, and which style each module uses.
+Five come built in: **Diwan, Rasf, Satr, Falak, Warsha** (`scenes/`).
+
+- Switching Scene changes the *layout*, not just the colours.
+- You can remix a Scene, export it as a file, and anyone who imports it sees exactly what you saw.
+- Switching Scenes **never** touches your notes, shortcuts or reading list. The storage layer enforces this.
+
+### Palette from image
+`shared/palette-from-image.js` + `shared/kmeans.js` pull colours out of an image using **k-means** (group similar pixel colours, take the centre of each group).
+
+## 3. Keyboard shortcuts
 
 | Shortcut | Action |
 |---|---|
-| `?` | Show every shortcut. Press again to dismiss |
-| `Ctrl+K` | Search open tabs, bookmarks and history at once |
-| `/` | The same search, from the new tab |
-| `Ctrl+Shift+P` | The same search, from any page in the browser |
-| `Ctrl+Shift+L` | Show or hide the side panel |
-| `Ctrl+Shift+S` | Save the current page to read later |
-| `Ctrl+Shift+F` | Focus mode — the time and the day, nothing else |
-| `A`–`Z` | Filter your shortcuts by typing, with the grid focused |
-| `Esc` | Close the search, clear a filter, or leave focus mode |
+| `?` | Show every shortcut |
+| `Ctrl+K` or `/` | Search open tabs, bookmarks and history |
+| `Ctrl+Shift+P` | Same search, from any page |
+| `Ctrl+Shift+L` | Show / hide the side panel |
+| `Ctrl+Shift+S` | Save current page to read later |
+| `Ctrl+Shift+F` | Focus mode: just the time and the day |
+| `A`–`Z` | Filter shortcuts by typing (with the grid focused) |
+| `Esc` | Close search, clear filter, or leave focus mode |
 
-On macOS, `⌘` replaces `Ctrl` throughout.
+On macOS use `⌘` instead of `Ctrl`.
+If `Ctrl+Shift+P` doesn't work, set it in `chrome://extensions/shortcuts`. Chrome ignores a shortcut another extension already took.
 
-If `Ctrl+Shift+P` doesn't open the command palette, go to
-`chrome://extensions/shortcuts` and assign it manually — Chrome silently
-declines a shortcut another extension already claimed.
+## 4. Privacy (important)
 
+- **No server, no account, no analytics, no tracking.** Fonts are bundled, icons are drawn from code, colours are computed on your machine.
+- **Only exception: Feeds.** If you turn it on, your browser fetches the RSS URLs *you* added, directly from those sites. That's why the extension asks for a host permission. It has no content scripts, so it can't read or change the pages you visit.
+- Everything you create stays in your browser's local storage.
+- **Check it yourself:** open DevTools → Network on a new tab. With Feeds off, every request is a local `chrome-extension://` one.
 
-## Privacy
+Full policy: `privacy-policy.html`.
 
-Lawha makes no network requests of its own. There is no server, no account, no
-analytics and no telemetry — fonts are bundled, icons are drawn from path data,
-and colours are computed on your machine.
+## 5. Folder map
 
-The one exception is Feeds (متابعات), an opt-in module that fetches the RSS or
-Atom URLs you add — directly from your browser to that feed's own server,
-never through a Lawha server, because there isn't one. It is off by default.
-Chrome only lets an extension's background service worker fetch a URL past
-that site's own CORS rules with a host permission in the manifest, which is
-why Lawha requests one; it grants no ability to read or modify any page you
-visit, since Lawha has no content scripts.
+| Path | What's inside |
+|---|---|
+| `manifest.json` | Extension settings (Manifest V3) |
+| `newtab/` | The new-tab page |
+| `sidebar/` | The side panel |
+| `popup/` | Toolbar popup |
+| `gallery/` | Browse, apply and remix Scenes |
+| `modules/` | The building blocks listed above |
+| `scenes/` | The five built-in Scenes (JSON) |
+| `shared/` | Common code: storage, palette, i18n, icons, messaging |
+| `background.js`, `offscreen.*` | Background worker; offscreen page parses feeds |
+| `_locales/` | Arabic and English text |
+| `tools/` | Checks, headless browser test, zip builder |
+| `docs/store-listing.md` | Chrome Web Store listing text |
 
-Everything you create — notes, shortcuts, reading queue, feed subscriptions —
-stays in your browser's own local storage.
+## 6. How to run it
 
-You can check all of this yourself: open a new tab, open DevTools → Network, and
-reload. With Feeds off, every request will be a local `chrome-extension://` one.
-Turn Feeds on and add a feed, and you will see exactly that request and nothing
-else — no telemetry, no request to anywhere you did not ask for.
+No dependencies, no build step. It's plain HTML, CSS and JavaScript.
 
-## Development
+1. Open `chrome://extensions`.
+2. Turn on **Developer mode** (top right).
+3. Click **Load unpacked** and pick this folder.
+4. Open a new tab.
 
-No dependencies and no build step — it is HTML, CSS and JavaScript as shipped.
-`bash tools/pre-submission.sh` runs every check: syntax, craft rules, colour
-contrast, the data-preservation guard, manifest validity and translation
-completeness. `tools/selftest.html`, loaded as an extension page, runs the
-data-preservation test against real storage.
+### Checks before publishing
+```bash
+bash tools/pre-submission.sh     # syntax, craft rules, contrast, data-safety guard, manifest, translations
+node tools/browser-check.mjs     # loads the extension in headless Chrome and tests it for real
+bash tools/build-zip.sh          # makes the zip for the Chrome Web Store
+```
+- `browser-check.mjs` checks the new tab boots, onboarding runs once, text is readable (4.5:1) over every Scene's background, gallery previews fill their cards, and a feed goes fetch → parse → storage → headline. It's slower and needs Chrome, so it's separate. Run it on any change that touches rendering.
+- `tools/selftest.html` (opened as an extension page) tests that your data survives, using real storage.
 
-`node tools/browser-check.mjs` settles what a grep cannot: it loads the
-extension into a headless Chrome and checks that the new tab boots and draws a
-Scene, that onboarding runs once, that text clears 4.5:1 over every gradient in
-every Scene, that the gallery's previews fill their cards, and that adding a
-feed goes fetch → offscreen parse → storage → headline. It is slower than the
-rest and needs Chrome, so it sits outside `pre-submission.sh`; run it on any
-change that touches rendering.
+## 7. Status
+
+- ✅ Version 1.1.1, feature-complete, with store listing and privacy policy ready.
+- ✅ Arabic + English.
 
 ## License
 MIT
